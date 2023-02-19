@@ -14,7 +14,7 @@ import lombok.Data;
   
   private String stationNumber; 
   
-  //In order to link FireStation and persons
+  //In order to link FireStation and Persons
   private List<Person> personsByStation;
 
 }

@@ -1,6 +1,5 @@
 package com.safetynet.safetynetalerts.model;
 
-
 import lombok.Builder;
 import lombok.Data;
 
@@ -22,6 +21,7 @@ public class Person {
   private String phone;
 
   private String email;
+
 
   //In order to link a medicalRecord to a person
   private MedicalRecord medicalRecord;

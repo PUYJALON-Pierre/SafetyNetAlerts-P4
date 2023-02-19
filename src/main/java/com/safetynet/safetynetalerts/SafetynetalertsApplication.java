@@ -114,7 +114,7 @@ public class SafetynetalertsApplication {
           }
         }
       }
-
+     
       /*Printing person, medicalRecord, fireStation object in order to check that they are
        * correctly building
        * 
@@ -143,7 +143,7 @@ public class SafetynetalertsApplication {
       jsonDataBase.setFirestations(fireStations);
       // return jsonDataBase???
 
-      
+   
       /*
        * System.out.println("nombre de personnes : " + jsonDataBase.getPersons().size());
        * System.out.println("------------------------------------------------------------");
