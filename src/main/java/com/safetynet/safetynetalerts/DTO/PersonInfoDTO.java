@@ -1,24 +1,31 @@
-package com.safetynet.safetynetalerts.model;
+package com.safetynet.safetynetalerts.DTO;
 
 import java.util.List;
+
 import lombok.Builder;
 import lombok.Data;
 
-
-
 @Data
 @Builder
-public class MedicalRecord {
+public class PersonInfoDTO {
 
 
   private String firstName;
 
   private String lastName;
 
+  private String address;
+
   private String birthdate;
+
+  private String email;
 
   private List <String> medications;
 
   private List <String> allergies;
+
+
+
+
 
 }

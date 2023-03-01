@@ -1,7 +1,6 @@
 package com.safetynet.safetynetalerts.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -9,35 +8,38 @@ import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
+import com.safetynet.safetynetalerts.DTO.ChildDTO;
+import com.safetynet.safetynetalerts.DTO.EmailDTO;
+import com.safetynet.safetynetalerts.DTO.PersonInfoDTO;
+import com.safetynet.safetynetalerts.DTO.PersonsByAddressInfosDTO;
 import com.safetynet.safetynetalerts.model.FireStation;
 import com.safetynet.safetynetalerts.model.JsonDataBase;
 import com.safetynet.safetynetalerts.model.MedicalRecord;
 import com.safetynet.safetynetalerts.model.Person;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
 public class PersonServiceTest {
 
-  @InjectMocks
-  private static PersonServiceImpl personServiceImpl;
+  @Autowired
+  private IPersonService iPersonService;
 
-  @Mock
-  private static JsonDataBase jsonDataBase;
+  @MockBean
+  private JsonDataBase jsonDataBase;
 
   @Mock
   MedicalRecord medicalRecord;
 
-  public static List<Person> persons = new ArrayList<>();
+  public List<Person> persons = new ArrayList<>();
 
   @BeforeEach
   void setUpPerTest() throws Exception {
-
+    
     persons.add(Person.builder().firstName("John").lastName("Boyd").address("1509 Culver St")
         .city("Culver").zip("97451").phone("841-874-6512").email("jaboyd@email.com")
         .medicalRecord(medicalRecord).build());
@@ -50,7 +52,7 @@ public class PersonServiceTest {
     persons.add(Person.builder().firstName("Brian").lastName("Stelzer").address("947 E. Rose Dr")
         .city("Culver").zip("97451").phone("841-874-7784").email("bstel@email.com")
         .medicalRecord(medicalRecord).build());
-
+    
     when(jsonDataBase.getPersons()).thenReturn(persons);
 
   }
@@ -63,12 +65,12 @@ public class PersonServiceTest {
   @Test
   void FindAllPersonsTest() {
 
-    List<Person> findAll = personServiceImpl.findAll();
+    List<Person> findAll = iPersonService.findAll();
 
     assertEquals(findAll, jsonDataBase.getPersons());
-
   }
 
+  
   @Test
   void addPersonTest() {
 
@@ -76,14 +78,15 @@ public class PersonServiceTest {
         .address("854 E. Tulipe Dr").city("Culver").zip("97451").phone("841-874-2648")
         .email("bendup@email.com").medicalRecord(medicalRecord).build();
 
-    // quand ajoute personne
-    personServiceImpl.addPerson(personToAdd);
-    jsonDataBase.setPersons(persons);
-
-    // retrieve le nombre de personne
+    // when add person
+    iPersonService.addPerson(personToAdd);
+   
+    // retrieve numberOfPersons expected with size list
     int numberOfPersonExpected = 5;
     assertEquals(persons.size(), numberOfPersonExpected);
 
+    //scénario echec?
+    
   }
 
   @Test
@@ -91,109 +94,198 @@ public class PersonServiceTest {
 
     persons.clear();
 
-    // ajout d'une personne
+    // adding a person
     persons.add(Person.builder().firstName("Brian").lastName("Stelzer").address("947 E. Rose Dr")
         .city("Culver").zip("97451").phone("841-874-7784").email("bstel@email.com")
         .medicalRecord(medicalRecord).build());
 
-    // créer update de la personne avec first name et lastname
+    // Creating update for person by firstName and lastName
     Person personToUpdate = Person.builder().firstName("Brian").lastName("Stelzer")
         .address("444 E. Rose Dr").city("Culver").zip("97451").phone("444-444-4444")
         .email("benoit@email.com").medicalRecord(medicalRecord).build();
 
-    String firstName = "Brian";
-    String lastName = "Stelzer";
+    // When update
+    Person personUpdated = iPersonService.updatePerson(personToUpdate);
 
-    // quand update personne
-    personServiceImpl.updatePerson(personToUpdate, firstName, lastName);
-
-    // retrieve le nombre de personne problème
-    assertEquals(persons.toString(), ("[" + personToUpdate.toString() + "]"));
-
+    // person retrieve in List is same as personToUpdate
+    assertEquals( "444 E. Rose Dr", personUpdated.getAddress() );
+    assertEquals( "444-444-4444", personUpdated.getPhone() );
+    assertEquals( "benoit@email.com", personUpdated.getEmail() );
+    assertEquals( persons.size(),1);
   }
 
   @Test
   void findPersonByNameTest() {
-//rajouter medical record
 
+    // firstName and lastName parameters
     String firstName = "John";
     String lastName = "Boyd";
-    // quand findByname
 
-    Person personToFind = personServiceImpl.findByName(firstName, lastName);
+    // When findByname
+    Person personToFind = iPersonService.findByName(firstName, lastName);
 
-    // retrieve le nombre de personne
-
+    // retrieve person attributes
     assertEquals(personToFind.getFirstName(), "John");
     assertEquals(personToFind.getLastName(), "Boyd");
-
+    assertEquals(personToFind.getAddress(), "1509 Culver St");
+    assertEquals(personToFind.getCity(), "Culver");
+    assertEquals(personToFind.getZip(), "97451");
+    assertEquals(personToFind.getPhone(), "841-874-6512");
+    assertEquals(personToFind.getEmail(), "jaboyd@email.com");
   }
 
   @Test
   void deletePersonTest() {
     persons.clear();
 
-    // ajout d'une personne
+    // adding a Person
     persons.add(Person.builder().firstName("Brian").lastName("Stelzer").address("947 E. Rose Dr")
         .city("Culver").zip("97451").phone("841-874-7784").email("bstel@email.com")
         .medicalRecord(medicalRecord).build());
 
+    // When delete
     String firstName = "Brian";
     String lastName = "Stelzer";
-    // quand delete
+    iPersonService.deletePerson(firstName, lastName);
 
-    personServiceImpl.deletePerson(firstName, lastName);
-    // retrieve le nombre de personne
-    // liste vide pour comparer
+    // Check if list is empty
     List<Person> emptyList = new ArrayList<>();
     assertEquals(emptyList, persons);
 
   }
 
   @Test
-  void findPersonByAdressTest() {
+  void findPersonsByAdressWithInfosTest() {
 
+    // given address to search, adding firestation to retrieve stationNumber, adding medicalRecords
+    // to find
     String address = "1509 Culver St";
-    // quand findByname
+    List<FireStation> fireStations = new ArrayList<>();
+    fireStations.add(FireStation.builder().address("1509 Culver St").stationNumber("3").build());
+    when(jsonDataBase.getFirestations()).thenReturn(fireStations);
 
-    List<String> personsToFind = personServiceImpl.findPersonsByAddressWithInfos(address);
+    List<MedicalRecord> medicalRecords = new ArrayList<>();
+    List<String> medications = new ArrayList<>();
+    List<String> allergies = new ArrayList<>();
 
-    // retrieve le nombre de personne
+    medications.add("aznol:350mg" + "hydrapermazol:100mg");
+    allergies.add("nillacilan");
 
-    assertThat(personsToFind.contains("John"));
-    assertThat(personsToFind.contains("Jacob"));
+    medicalRecords.add(MedicalRecord.builder().firstName("John").lastName("Boyd")
+        .birthdate("03/06/1984").medications(medications).allergies(allergies).build());
+
+    medicalRecords.add(MedicalRecord.builder().firstName("Jacob").lastName("Boyd")
+        .birthdate("03/06/1989").medications(medications).allergies(allergies).build());
+
+    when(jsonDataBase.getMedicalRecords()).thenReturn(medicalRecords);
+
+    // in order to link person and medical records
+    for (Person person : persons) {
+
+      for (MedicalRecord medicalRecord : medicalRecords) {
+
+        if (person.getFirstName().equals(medicalRecord.getFirstName())
+            && person.getLastName().equals(medicalRecord.getLastName())) {
+
+          person.setMedicalRecord(medicalRecord);
+        }
+      }
+    }
+
+    // when
+    List<PersonsByAddressInfosDTO> personsToFind = iPersonService
+        .findPersonsByAddressWithInfos(address);
+
+    String stationNumber = null;
+    for (PersonsByAddressInfosDTO personInfos : personsToFind) {
+      stationNumber = personInfos.getStationNumber();
+    }
+    // Check that size of list is 2 because of John Boyd and Jacob Boyd at same house
+    assertEquals(personsToFind.size(), 2);
+    assertEquals(stationNumber, "3");
+
   }
 
   @Test
   void findAllEmailTest() {
 
-    List<String> findAllEmail = personServiceImpl.findAllEmail();
+    List<EmailDTO> findAllEmail = iPersonService.findAllEmail();
 
-    assertEquals(findAllEmail.toString(),
-        ("[jaboyd@email.com, drk@email.com, lily@email.com, bstel@email.com]"));
+    assertEquals(findAllEmail.size(), 4);
+    assertEquals(findAllEmail.get(0).getEmail(), "jaboyd@email.com");
+    assertEquals(findAllEmail.get(1).getEmail(), "drk@email.com");
+    assertEquals(findAllEmail.get(2).getEmail(), "lily@email.com");
+    assertEquals(findAllEmail.get(3).getEmail(), "bstel@email.com");
 
   }
 
   @Test
   void findAllPersonsInfoTest() {
-//rajouter medicalrecords
 
-    List<String> findAllPersonsInfo = personServiceImpl.findAllPersonsInfo();
-    // System.out.println(findAllPersonsInfo);
+    //given
+    persons.clear();
 
-    assertEquals(findAllPersonsInfo.toString(),
-        "[Boyd, John, 1509 Culver St, null, jaboyd@email.com, Boyd, Jacob, 1509 Culver St, null, drk@email.com, Cooper, Lily, 489 Manchester St, null, lily@email.com, Stelzer, Brian, 947 E. Rose Dr, null, bstel@email.com]");
-  }
+    persons.add(Person.builder().firstName("John").lastName("Boyd").address("1509 Culver St")
+        .city("Culver").zip("97451").phone("841-874-6512").email("jaboyd@email.com")
+        .medicalRecord(medicalRecord).build());
+    persons.add(Person.builder().firstName("Jacob").lastName("Boyd").address("1509 Culver St")
+        .city("Culver").zip("97451").phone("841-874-6513").email("drk@email.com")
+        .medicalRecord(medicalRecord).build());
 
-  @Test
-  void findChildByAddressTest() {
-//create lists in order to use medical record
-   List<MedicalRecord> medicalRecords = new ArrayList<>();
+    List<MedicalRecord> medicalRecords = new ArrayList<>();
     List<String> medications = new ArrayList<>();
     List<String> allergies = new ArrayList<>();
 
-    //add medicalRecords
     medications.add("aznol:350mg" + "hydrapermazol:100mg");
+    allergies.add("nillacilan");
+
+    medicalRecords.add(MedicalRecord.builder().firstName("John").lastName("Boyd")
+        .birthdate("03/06/1984").medications(medications).allergies(allergies).build());
+
+    medicalRecords.add(MedicalRecord.builder().firstName("Jacob").lastName("Boyd")
+        .birthdate("03/06/1989").medications(medications).allergies(allergies).build());
+
+    when(jsonDataBase.getMedicalRecords()).thenReturn(medicalRecords);
+
+    // in order to link person and medical records
+    for (Person person : persons) {
+
+      for (MedicalRecord medicalRecord : medicalRecords) {
+
+        if (person.getFirstName().equals(medicalRecord.getFirstName())
+            && person.getLastName().equals(medicalRecord.getLastName())) {
+
+          person.setMedicalRecord(medicalRecord);
+        }
+      }
+    }
+
+    // When
+    List<PersonInfoDTO> findAllPersonsInfo = iPersonService.findAllPersonsInfo();
+    
+    // Then
+    assertEquals(findAllPersonsInfo.size(), 2);
+    assertEquals(findAllPersonsInfo.get(0).getFirstName(), "John");
+    assertEquals(findAllPersonsInfo.get(0).getLastName(), "Boyd");
+    assertEquals(findAllPersonsInfo.get(0).getAddress(), "1509 Culver St");
+    assertEquals(findAllPersonsInfo.get(0).getBirthdate(), "03/06/1984");
+    assertEquals(findAllPersonsInfo.get(0).getEmail(), "jaboyd@email.com");
+    assertEquals(findAllPersonsInfo.get(0).getMedications().toString(), "[aznol:350mghydrapermazol:100mg]");
+    assertEquals(findAllPersonsInfo.get(0).getAllergies().toString(), "[nillacilan]");
+    
+    assertEquals(findAllPersonsInfo.get(1).toString(), "PersonInfoDTO(firstName=Jacob, lastName=Boyd, address=1509 Culver St, birthdate=03/06/1989, email=drk@email.com, medications=[aznol:350mghydrapermazol:100mg], allergies=[nillacilan])");
+ 
+  }
+
+  @Test
+  void findChildByAddressTest() { 
+    
+    // create lists in order to use medical record
+    List<MedicalRecord> medicalRecords = new ArrayList<>();
+    List<String> medications = new ArrayList<>();
+    List<String> allergies = new ArrayList<>();
+
+    // add medicalRecords medications.add("aznol:350mg" + "hydrapermazol:100mg");
     allergies.add("nillacilan");
 
     medicalRecords.add(MedicalRecord.builder().firstName("John").lastName("Boyd")
@@ -208,8 +300,7 @@ public class PersonServiceTest {
     medicalRecords.add(MedicalRecord.builder().firstName("Brian").lastName("Stelzer")
         .birthdate("12/06/1975").medications(medications).allergies(allergies).build());
 
-  
-    //in order to link person and medical records
+    // in order to link person and medical records
     for (Person person : persons) {
 
       for (MedicalRecord medicalRecord : medicalRecords) {
@@ -221,16 +312,40 @@ public class PersonServiceTest {
         }
       }
     }
-    
-   //when findChildByAddress (miss personne à l'adress)
+
+    // when findChildByAddress
     String address = "1509 Culver St";
-    List<String> childrenListByAddress = personServiceImpl.findChildByAddress(address);
+    List<ChildDTO> childrenListByAddress = iPersonService.findChildByAddress(address);
 
+   //then
+    assertEquals(childrenListByAddress.size(), 2);
+    assertEquals(childrenListByAddress.get(0).getFirstName(), "John");
+    assertEquals(childrenListByAddress.get(0).getLastName(), "Boyd");
+    assertEquals(childrenListByAddress.get(0).getAge(), 14);
+    assertEquals(childrenListByAddress.get(0).getPersonsAtSameHouse().size(), 2);
     
     
+    assertEquals(childrenListByAddress.get(1).getFirstName(), "Jacob");
+    assertEquals(childrenListByAddress.get(1).getLastName(), "Boyd");
+    assertEquals(childrenListByAddress.get(1).getAge(), 2);
+    assertEquals(childrenListByAddress.get(1).getPersonsAtSameHouse().size(), 2);
     
-
-    assertEquals(childrenListByAddress.toString(), "[Boyd, John, 14 years, Boyd, John, Boyd, Jacob, Boyd, Jacob, 2 years, Boyd, John, Boyd, Jacob]");
   }
+  
+  
+  @Test
+  void findNoChildByAddressTest() { 
+
+    persons.clear();
+   
+    String address = "1509 Culver St";
+    List<ChildDTO> childrenListByAddress = iPersonService.findChildByAddress(address);
+    List<ChildDTO> emptyList = new ArrayList();
+   
+    //then
+    assertEquals(childrenListByAddress.toString(), emptyList.toString() );
+  }
+  
+  
 
 }

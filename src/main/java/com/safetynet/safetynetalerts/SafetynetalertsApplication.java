@@ -7,11 +7,11 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import com.jsoniter.JsonIterator;
 import com.jsoniter.any.Any;
@@ -20,15 +20,19 @@ import com.safetynet.safetynetalerts.model.JsonDataBase;
 import com.safetynet.safetynetalerts.model.MedicalRecord;
 import com.safetynet.safetynetalerts.model.Person;
 
-@SpringBootApplication @Configuration
+@SpringBootApplication
 public class SafetynetalertsApplication {
+
+  @Autowired
+  JsonDataBase jsonDataBase;
+  
+  final static Logger logger = LogManager.getLogger(SafetynetalertsApplication.class);
 
   public static void main(String[] args) {
 
-    final Logger LOGGER = LogManager.getLogger(SafetynetalertsApplication.class);
-    LOGGER.debug("Starting SafetynetalertsApplication");
-
+    logger.debug("Starting SafetynetalertsApplication");
     SpringApplication.run(SafetynetalertsApplication.class, args);
+    
   }
 
   @Bean
@@ -36,125 +40,150 @@ public class SafetynetalertsApplication {
     return args -> {
 
       // Loading Json file
+
       String filePath = "src/main/resources/data.json";
       byte[] bytesFile = Files.readAllBytes(new File(filePath).toPath());
-      JsonDataBase jsonDataBase = new JsonDataBase();
+
       JsonIterator iterator = JsonIterator.parse(bytesFile);
       Any any = iterator.readAny();
 
-      // Iterating and building for Person
+      // Charging Persons from file into model object
+
       Any personToRead = any.get("persons");
-      List<Person> persons = new ArrayList<>();
-      personToRead
-          .forEach(a -> persons.add(Person.builder().firstName(a.get("firstName").toString())
+      logger.info("Charging Person data from file into model object");
+      List<Person> persons = initializePersons(personToRead);
+      logger.info("Number of persons loaded ", persons.size());
 
-              .address(a.get("address").toString())
+      // Charging medicalRecords from file into model object
 
-              .city(a.get("city").toString())
-
-              .lastName(a.get("lastName").toString())
-
-              .phone(a.get("phone").toString())
-
-              .zip(a.get("zip").toString())
-
-              .email(a.get("email").toString())
-
-              .build()));
-
-      // Iterating and building for Medical Records
       Any medicalToRead = any.get("medicalrecords");
-      List<MedicalRecord> medicalRecords = new ArrayList<>();
-      medicalToRead.forEach(
-          a -> medicalRecords.add(MedicalRecord.builder().firstName(a.get("firstName").toString())
+      logger.info("Charging medicalRecords data from file into model object");
+      List<MedicalRecord> medicalRecords = initializeMedicalRecords(medicalToRead);
+      logger.info("Number of medicalsRecords loaded ", medicalRecords.size());
 
-              .lastName(a.get("lastName").toString())
+      // Charging FireStation from file into model object
 
-              .birthdate(a.get("birthdate").toString())
+      Any fireStationToRead = any.get("firestations");
+      logger.info("Charging fireStations data from file into model object");
+      List<FireStation> fireStations = initializeFireStations(fireStationToRead);
+      logger.info("Number of fireStations loaded ", fireStations.size());
 
-              .medications(List.of(a.get("medications").toString()))
+      // Linking medicalRecord to Person
 
-              .allergies(List.of(a.get("allergies").toString()))
+      logger.info("Adding medicalRecords to persons");
+      addMedicalRecordToPerson(persons, medicalRecords);
 
-              .build()));
+      // Linking Person to FireStation
 
-      // Linking between persons and medicalRecords
-      for (Person person : persons) {
+      logger.info("Adding persons to fireStations");
+      addPersonToFireStation(persons, fireStations);
 
-        for (MedicalRecord medicalRecord : medicalRecords) {
-
-          if (person.getFirstName().equals(medicalRecord.getFirstName())
-              && person.getLastName().equals(medicalRecord.getLastName())) {
-
-            person.setMedicalRecord(medicalRecord);
-          }
-        }
-      }
-
-      // Iterating and building for FireStations
-      Any firestationToRead = any.get("firestations");
-      List<FireStation> fireStations = new ArrayList<>();
-      firestationToRead
-          .forEach(a -> fireStations.add(FireStation.builder().address(a.get("address").toString())
-
-              .stationNumber(a.get("station").toString())
-
-              .build()));
-
-      // Linking between persons and firestations
-      for (FireStation firestation : fireStations) {
-
-        List<Person> personsByStation = new ArrayList<Person>();
-        for (Person person : persons) {
-
-          if (firestation.getAddress().equals(person.getAddress())) {
-
-            personsByStation.add(person);
-            firestation.setPersonsByStation(personsByStation);
-          }
-        }
-      }
-     
-      /*Printing person, medicalRecord, fireStation object in order to check that they are
-       * correctly building
-       * 
-       * for (MedicalRecord m : medicalRecords) { System.out.println(m.getFirstName() + "\n" +
-       * m.getLastName() + "\n" + m.getBirthdate() + "\n" + m.getMedications() + "\n" +
-       * m.getAllergies());
-       * System.out.println("------------------------------------------------------------"); }
-       * 
-       * for (Person p : persons) { System.out.println(p.getFirstName() + "\n" + p.getLastName() +
-       * "\n" + p.getAddress() + "\n" + p.getCity() + "\n" + p.getPhone() + "\n" + p.getZip() + "\n"
-       * + p.getEmail() + "\n" + p.getMedicalRecord().getAllergies() + "\n" +
-       * p.getMedicalRecord().getMedications());
-       * 
-       * System.out.println("------------------------------------------------------------");
-       * 
-       * }
-       * 
-       * for (FireStation f : fireStations) { System.out.println(f.getAddress() + "\n" +
-       * f.getStationNumber() + f.getPersonsByStation());
-       * 
-       * } System.out.println("------------------------------------------------------------");
-       */
+      // Setting jSonDataBase Object with generated lists
 
       jsonDataBase.setPersons(persons);
       jsonDataBase.setMedicalRecords(medicalRecords);
       jsonDataBase.setFirestations(fireStations);
-      // return jsonDataBase???
-
-   
-      /*
-       * System.out.println("nombre de personnes : " + jsonDataBase.getPersons().size());
-       * System.out.println("------------------------------------------------------------");
-       * System.out.println("nombre de medical records : " +
-       * jsonDataBase.getMedicalRecords().size());
-       * System.out.println("------------------------------------------------------------");
-       * System.out.println("nombre de FireStation : " +jsonDataBase.getFirestations().size());
-       * 
-       */
 
     };
+  }
+
+
+  private List<Person> initializePersons(Any personToRead) {
+
+    // Iterating and building for Persons
+    List<Person> persons = new ArrayList<>();
+    personToRead.forEach(a -> persons.add(Person.builder().firstName(a.get("firstName").toString())
+
+        .address(a.get("address").toString())
+
+        .city(a.get("city").toString())
+
+        .lastName(a.get("lastName").toString())
+
+        .phone(a.get("phone").toString())
+
+        .zip(a.get("zip").toString())
+
+        .email(a.get("email").toString())
+
+        .build()));
+
+    return persons;
+
+  }
+
+
+  private List<MedicalRecord> initializeMedicalRecords(Any medicalToRead) {
+
+    // Iterating and building for Medical Records
+    List<MedicalRecord> medicalRecords = new ArrayList<>();
+    medicalToRead.forEach(
+        a -> medicalRecords.add(MedicalRecord.builder().firstName(a.get("firstName").toString())
+
+            .lastName(a.get("lastName").toString())
+
+            .birthdate(a.get("birthdate").toString())
+
+            .medications(List.of(a.get("medications").toString()))
+
+            .allergies(List.of(a.get("allergies").toString()))
+
+            .build()));
+
+    return medicalRecords;
+  }
+
+
+  private List<FireStation> initializeFireStations(Any firestationToRead) {
+
+    // Iterating and building for FireStations
+    List<FireStation> fireStations = new ArrayList<>();
+    firestationToRead
+        .forEach(a -> fireStations.add(FireStation.builder().address(a.get("address").toString())
+
+            .stationNumber(a.get("station").toString())
+
+            .build()));
+
+    return fireStations;
+
+  }
+
+
+  private void addMedicalRecordToPerson(List<Person> persons, List<MedicalRecord> medicalRecords) {
+   
+    // Linking between persons and medicalRecords
+    for (Person person : persons) {
+
+      for (MedicalRecord medicalRecord : medicalRecords) {
+
+        if (person.getFirstName().equals(medicalRecord.getFirstName())
+            && person.getLastName().equals(medicalRecord.getLastName())) {
+
+          person.setMedicalRecord(medicalRecord);
+        }
+      }
+    }
+
+  }
+
+
+  private void addPersonToFireStation(List<Person> persons, List<FireStation> fireStations) {
+    
+    // Linking between persons and fireStations
+    for (FireStation firestation : fireStations) {
+
+      List<Person> personsByStation = new ArrayList<>();
+      for (Person person : persons) {
+
+        if (firestation.getAddress().equals(person.getAddress())) {
+
+          personsByStation.add(person);
+          firestation.setPersonsByStation(personsByStation);
+        }
+      }
+    }
+
   }
 
 }

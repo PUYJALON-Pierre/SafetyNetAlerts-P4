@@ -6,19 +6,18 @@ import com.safetynet.safetynetalerts.model.MedicalRecord;
 
 public interface IMedicalRecordService {
 
-  /*Faire une liste avec toutes les medicalRecords */
+  /*Create list of all medicalRecords*/
   public List<MedicalRecord> findAll();
-  
-  /*Ajouter medicalRecord */
+
+  /*Add a medicalRecord */
   public void addMedicalRecord(MedicalRecord medicalRecord);
-  
-  /*Update un medicalRecord */
-  public void updateMedicalRecord(MedicalRecord medicalRecordUpdate, String firstName, String lastName);
-  
-  /*Delete un medicalRecord */
+
+  /*Update a medicalRecord */
+  public void updateMedicalRecord(MedicalRecord medicalRecordUpdate);
+
+  /*Delete a medicalRecord */
   public void deleteMedicalRecord(String firstName, String lastName);
-  
-  
-  /*Find un medicalRecord */
+
+  /*Find a medicalRecord */
   public MedicalRecord findMedicalRecordByName(String firstName, String lastName);
 }
