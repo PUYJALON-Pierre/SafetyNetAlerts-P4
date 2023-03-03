@@ -33,25 +33,36 @@ public class IPersonServiceImpl implements IPersonService {
 
   @Override
   public List<Person> findAll() {
-    return jSonDataBase.getPersons();
-
+    logger.debug(" Start finding all persons");
+    logger.info(" Getting all persons ");
+    List<Person> persons = jSonDataBase.getPersons();
+    if(persons.isEmpty()) {
+    logger.error("No persons found");
+    }
+    return persons;
   }
 
+  
   @Override
   public Person addPerson(Person personToAdd) {
-   List<Person>persons = jSonDataBase.getPersons();
-   boolean anyMatch = persons.stream().anyMatch(p -> p.getFirstName().equals(personToAdd.getFirstName())
+    logger.debug("Starting adding person");
+    List<Person> persons = jSonDataBase.getPersons();
+    boolean anyMatch = persons.stream()
+        .anyMatch(p -> p.getFirstName().equals(personToAdd.getFirstName())
             && p.getLastName().equals(personToAdd.getLastName()));
-   if (!anyMatch) {
-     
-     jSonDataBase.getPersons().add(personToAdd);
-   }
-   return personToAdd;
+    if (!anyMatch) {
+      logger.info("Person add because not already existing");
+      persons.add(personToAdd);
+      jSonDataBase.setPersons(persons);
+    } else {
+      logger.info("Person not add because already existing");
+    }
+    return personToAdd;
   }
 
   @Override
   public Person updatePerson(Person personUpdate) {
-
+    logger.debug("Starting updating person");
     // Finding person to update with a stream by firstName and lastName
     Optional<Person> optionalPerson = jSonDataBase.getPersons().stream()
         .filter(p -> p.getFirstName().equals(personUpdate.getFirstName())
@@ -71,37 +82,48 @@ public class IPersonServiceImpl implements IPersonService {
       personToUpdate.setMedicalRecord(personUpdate.getMedicalRecord());
 
       jSonDataBase.setPersons(jSonDataBase.getPersons());
+      logger.info("Person find and updated");
     }
 
     else {
-      System.out.println("No more person to udpate by this firstname and lastname");
+      logger.error("No more person to udpate by this firstname and lastname");
     }
     return personUpdate;
   }
 
   @Override
-  public void deletePerson(String firstName, String lastName) {
+  public Person deletePerson(String firstName, String lastName) {
 
     Person personToDelete = findByName(firstName, lastName);
+    logger.debug("Deleting person");
 
-    List<Person> persons = jSonDataBase.getPersons();
+    if (personToDelete != null) {
+      logger.info("Deleting person {} {} ", firstName, lastName);
 
-    persons.remove(personToDelete);
+      List<Person> persons = jSonDataBase.getPersons();
+      persons.remove(personToDelete);
+      jSonDataBase.setPersons(persons);
+    }
 
-    jSonDataBase.setPersons(persons);
+    else {
+      logger.error("Person {} {} not found", firstName, lastName);
+
+    }
+    return personToDelete;
   }
 
   @Override
   public Person findByName(String firstName, String lastName) {
+    logger.debug("Starting finding person by name");
     Optional<Person> optionalPerson = jSonDataBase.getPersons().stream()
         .filter(p -> p.getFirstName().equals(firstName) && p.getLastName().equals(lastName))
         .findAny();
 
     if (optionalPerson.isPresent()) {
-
+      logger.info("Found person {} {} ", firstName, lastName);
       return optionalPerson.get();
     } else {
-      System.out.println("No more finding person by firstname and lastname, no match");
+      logger.error("Error finding person by firstname and lastname, no match");
     }
     return null;
   }
@@ -110,28 +132,27 @@ public class IPersonServiceImpl implements IPersonService {
 
   @Override
   public List<PersonsByAddressInfosDTO> findPersonsByAddressWithInfos(String address) {
-
-    /*(FIRE URL) Create list of DTO with information to stock and return */
+    logger.debug("Starting finding person with informations at address : {}", address);
+    /* Create list of DTO with information to stock and return */
     List<PersonsByAddressInfosDTO> personsByAddressInfos = new ArrayList<>();
     List<Person> persons = jSonDataBase.getPersons();
     List<FireStation> fireStations = jSonDataBase.getFirestations();
 
     // add person informations to list when a person address and address parameters match
+    logger.info("Searching person at address : {}", address);
     for (Person person : persons) {
-      if (person.getAddress() == address) {
+      if (person.getAddress().equals(address)) {
 
-       PersonsByAddressInfosDTO personDTO = PersonsByAddressInfosDTO.builder()
-           .lastName(person.getLastName())
-           .firstName(person.getFirstName())
-           .phoneNumber(person.getPhone())
-           .birthdate(person.getMedicalRecord().getBirthdate()) 
-           .medications(person.getMedicalRecord().getMedications())
-           .allergies(person.getMedicalRecord().getAllergies())
-           .build();
+        PersonsByAddressInfosDTO personDTO = PersonsByAddressInfosDTO.builder()
+            .address(person.getAddress()).lastName(person.getLastName())
+            .firstName(person.getFirstName()).phoneNumber(person.getPhone())
+            .birthdate(person.getMedicalRecord().getBirthdate())
+            .medications(person.getMedicalRecord().getMedications())
+            .allergies(person.getMedicalRecord().getAllergies()).build();
 
         // add stationNumber to DTO object when fireStation address match address parameter
         for (FireStation fireStation : fireStations) {
-          if (fireStation.getAddress() == address) {
+          if (fireStation.getAddress().equals(address)) {
 
             personDTO.setStationNumber(fireStation.getStationNumber());
 
@@ -140,65 +161,76 @@ public class IPersonServiceImpl implements IPersonService {
         personsByAddressInfos.add(personDTO);
       }
     }
+    if (personsByAddressInfos.isEmpty()) {
+      logger.error("No person found at address : {}", address);
+    }
+
     return personsByAddressInfos;
   }
 
-
   @Override
-  public List<EmailDTO> findAllEmail() {
-
+  public List<EmailDTO> findAllEmailByCity(String city) {
+    logger.debug("Starting finding all inhabitants email of : {}", city);
     List<EmailDTO> emailList = new ArrayList<>();
     List<Person> persons = jSonDataBase.getPersons();
-
+    logger.info("Creating list of email for all inhabitants");
     for (Person person : persons) {
-      EmailDTO email = EmailDTO.builder().email(person.getEmail()).build();
-      emailList.add(email);
+
+      if (person.getCity().equals(city)) {
+
+        EmailDTO email = EmailDTO.builder().email(person.getEmail()).build();
+        emailList.add(email);
+      }
+    }
+
+    if (emailList.isEmpty()) {
+      logger.error("No mail found for : {}", city);
     }
     return emailList;
   }
 
   @Override
   public List<PersonInfoDTO> findAllPersonsInfo() {
-
+    logger.debug("Starting finding all inhabitants informations");
     List<PersonInfoDTO> infoList = new ArrayList<>();
 
     List<Person> persons = jSonDataBase.getPersons();
-
+    logger.info("Creating list of inofrmations for all inhabitants");
     for (Person person : persons) {
 
-      PersonInfoDTO personInfoDTO = PersonInfoDTO.builder()
-          .lastName(person.getLastName())
-          .firstName(person.getFirstName())
-          .address(person.getAddress())
-          .birthdate(person.getMedicalRecord().getBirthdate())
-          .email(person.getEmail())
+      PersonInfoDTO personInfoDTO = PersonInfoDTO.builder().lastName(person.getLastName())
+          .firstName(person.getFirstName()).address(person.getAddress())
+          .birthdate(person.getMedicalRecord().getBirthdate()).email(person.getEmail())
           .medications(person.getMedicalRecord().getMedications())
-          .allergies(person.getMedicalRecord().getAllergies())
-          .build();
+          .allergies(person.getMedicalRecord().getAllergies()).build();
 
       infoList.add(personInfoDTO);
-
+    }
+    if (infoList.isEmpty()) {
+      logger.error("No person informations");
     }
     return infoList;
   }
 
   @Override
   public List<ChildDTO> findChildByAddress(String address) {
-
+    logger.debug("Starting finding children at address : {}", address);
     List<ChildDTO> childrenList = new ArrayList<>();
     List<Person> persons = jSonDataBase.getPersons();
     List<Person> personsAtSameHouse = new ArrayList<>();
-    for (Person person : persons) {
 
+    logger.info("Searching children at address : {}", address);
+    for (Person person : persons) {
+      String personAddress = person.getAddress().toString();
       // filter people at this address
-      if (person.getAddress() == address) {
+      if (personAddress.equals(address)) {
 
         // adding people to list of person in the house
-        
+
         personsAtSameHouse.add(person);
 
         // checking if person is a child by calculating age
-       
+
         Date birthdate = null;
         try {
           birthdate = (new SimpleDateFormat("MM/dd/yyyy"))
@@ -219,19 +251,19 @@ public class IPersonServiceImpl implements IPersonService {
         // if child then add informations to list
         if (age <= 18) {
 
-          ChildDTO child = ChildDTO.builder()
-              .firstName(person.getFirstName())
-              .LastName(person.getLastName())
-              .age(age)
-              .build();
+          ChildDTO child = ChildDTO.builder().firstName(person.getFirstName())
+              .LastName(person.getLastName()).age(age).build();
 
           childrenList.add(child);
         }
       }
-      //setting list of person at same house (nom de la personne aussi pas que les autre problème?)
+      // setting list of person at same house (nom de la personne aussi pas que les autre problème?)
       for (ChildDTO child : childrenList) {
         child.setPersonsAtSameHouse(personsAtSameHouse);
       }
+    }
+    if (childrenList.isEmpty()) {
+      logger.info("No children found at address : {}", address);
     }
     return childrenList;
   }

@@ -168,6 +168,24 @@ public class FireStationServiceTest {
     assertEquals(emptyList, firestations);
   }
 
+  
+
+  @Test
+  void  findStationByAddressTest () {
+    // firstName and lastName parameters
+    String address = "1509 Culver St";
+    String stationNumber = "3";
+
+    // When findByname
+    FireStation fireStationToFind = iFireStationService.findStationByAddress(address, stationNumber);
+
+    // retrieve person attributes
+    assertEquals(fireStationToFind.getAddress(), "1509 Culver St");
+    assertEquals(fireStationToFind.getStationNumber(), "3");
+
+  }
+  
+ 
   @Test
   void findPersonByStationTest() {
     // Given stationNumber searching

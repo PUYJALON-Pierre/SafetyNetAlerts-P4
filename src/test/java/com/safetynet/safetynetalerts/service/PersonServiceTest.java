@@ -208,8 +208,8 @@ public class PersonServiceTest {
 
   @Test
   void findAllEmailTest() {
-
-    List<EmailDTO> findAllEmail = iPersonService.findAllEmail();
+    String city = "Culver";
+    List<EmailDTO> findAllEmail = iPersonService.findAllEmailByCity(city);
 
     assertEquals(findAllEmail.size(), 4);
     assertEquals(findAllEmail.get(0).getEmail(), "jaboyd@email.com");
@@ -329,7 +329,7 @@ public class PersonServiceTest {
     assertEquals(childrenListByAddress.get(1).getLastName(), "Boyd");
     assertEquals(childrenListByAddress.get(1).getAge(), 2);
     assertEquals(childrenListByAddress.get(1).getPersonsAtSameHouse().size(), 2);
-    
+   
   }
   
   

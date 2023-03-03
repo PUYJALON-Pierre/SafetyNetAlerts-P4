@@ -23,7 +23,7 @@ public interface IPersonService {
   public Person updatePerson (Person personUpdate);
 
   /*Delete a person by firstName and LastName */
-  public void deletePerson (String firstName, String lastName);
+  public Person deletePerson (String firstName, String lastName);
 
   /*Find a person by firstName and LastName*/
   public Person findByName(String firstname, String lastName);
@@ -32,7 +32,7 @@ public interface IPersonService {
   public List<PersonsByAddressInfosDTO> findPersonsByAddressWithInfos (String address);
 
   /*(URL Email)Find email for all persons*/
-  public List<EmailDTO> findAllEmail();
+  public List<EmailDTO> findAllEmailByCity(String city);
 
   /* (URL N°6)Create a List of all informations for each person */
   public List<PersonInfoDTO> findAllPersonsInfo();

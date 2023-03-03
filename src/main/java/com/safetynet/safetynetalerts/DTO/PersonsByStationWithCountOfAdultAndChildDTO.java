@@ -9,10 +9,10 @@ import lombok.Data;
 @Builder
 public class PersonsByStationWithCountOfAdultAndChildDTO {
 
-  private List<PersonCoveredByStationNumberDTO> personListByStationNumber;
-
   private int numberChildren ;
 
   private int numberAdult;
+  
+  private List<PersonCoveredByStationNumberDTO> personListByStationNumber;
 
 }

@@ -16,13 +16,13 @@ public interface IFireStationService {
   public List<FireStation> findAll();
 
   /*Add a FireStation*/
-  public void addFireStation(FireStation fireStationToAdd);
+  public FireStation addFireStation(FireStation fireStationToAdd);
 
   /*Update FireStation by address and stationNumber */
-  public void updateStationNumber(FireStation fireStation);
+  public FireStation updateStationNumber(FireStation fireStation);
 
   /*Delete FireStation by address and stationNumber*/
-  public void deleteFireStation(String address, String stationNumber);
+  public FireStation deleteFireStation(String address, String stationNumber);
 
   /*Create list of all people covered by a FireStations*/
   public List <PersonsByAddressInfosDTO> findAllPersonsSortedByAddressAndStation(String stationNumber);
@@ -36,5 +36,7 @@ public interface IFireStationService {
   /*Create list of person covered by a FireStation number*/
   public List <Person> findPersonsByStation(String stationNumber);
 
+  /*Find a fireStation by address and number*/
+ public FireStation findStationByAddress(String address, String stationNumber);
 }
 
