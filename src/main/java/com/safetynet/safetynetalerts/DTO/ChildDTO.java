@@ -12,9 +12,9 @@ import lombok.Data;
 public class ChildDTO {
 
   private String firstName;
-  private String LastName;
+  private String lastName;
   private int age;
-  private List<Person> PersonsAtSameHouse;
+  private List<PhoneNumberDTO> personsAtSameHouse;
 
   
 }

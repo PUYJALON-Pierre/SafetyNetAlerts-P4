@@ -79,7 +79,6 @@ public class SafetynetalertsApplication {
       addPersonToFireStation(persons, fireStations);
 
       // Setting jSonDataBase Object with generated lists
-
       jsonDataBase.setPersons(persons);
       jsonDataBase.setMedicalRecords(medicalRecords);
       jsonDataBase.setFirestations(fireStations);

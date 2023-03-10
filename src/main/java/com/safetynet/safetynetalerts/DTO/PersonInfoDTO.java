@@ -16,7 +16,7 @@ public class PersonInfoDTO {
 
   private String address;
 
-  private String birthdate;
+  private int age;
 
   private String email;
 

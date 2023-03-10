@@ -10,13 +10,13 @@ public interface IMedicalRecordService {
   public List<MedicalRecord> findAll();
 
   /*Add a medicalRecord */
-  public void addMedicalRecord(MedicalRecord medicalRecord);
+  public MedicalRecord addMedicalRecord(MedicalRecord medicalRecord);
 
   /*Update a medicalRecord */
-  public void updateMedicalRecord(MedicalRecord medicalRecordUpdate);
+  public MedicalRecord updateMedicalRecord(MedicalRecord medicalRecordUpdate);
 
   /*Delete a medicalRecord */
-  public void deleteMedicalRecord(String firstName, String lastName);
+  public MedicalRecord deleteMedicalRecord(String firstName, String lastName);
 
   /*Find a medicalRecord */
   public MedicalRecord findMedicalRecordByName(String firstName, String lastName);
