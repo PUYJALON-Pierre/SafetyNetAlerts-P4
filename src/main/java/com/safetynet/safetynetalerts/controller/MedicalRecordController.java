@@ -36,7 +36,7 @@ public class MedicalRecordController {
     
     if (medicalRecord == null) {
       logger.error("Error during adding medical record");
-      return new ResponseEntity<MedicalRecord>(medicalRecord, HttpStatus.NOT_FOUND);
+      return new ResponseEntity<MedicalRecord>(medicalRecord, HttpStatus.BAD_REQUEST);
     } else {
       logger.info("Creation of medical record completed or already existing");
       return new ResponseEntity<MedicalRecord>(medicalRecord, HttpStatus.CREATED);
@@ -71,7 +71,7 @@ public class MedicalRecordController {
     MedicalRecord medicalRecordToDelete= iMedicalRecordService.deleteMedicalRecord(firstName, lastName);
     if (medicalRecordToDelete== null) {
       logger.error("Error during deleting medical record");
-      return new ResponseEntity<MedicalRecord>(medicalRecordToDelete, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<MedicalRecord>(medicalRecordToDelete, HttpStatus.NOT_FOUND);
     } 
     else {
       logger.info("Medical record deleting successfully");
@@ -90,10 +90,10 @@ public class MedicalRecordController {
     
     if (medicalRecords.isEmpty()) {
       logger.error("Error during recuperation of medical records");
-      return new ResponseEntity<List<MedicalRecord>>(medicalRecords, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<List<MedicalRecord>>(medicalRecords, HttpStatus.NOT_FOUND);
     }
     else {logger.info("Medical records list found");
-    return new ResponseEntity<List<MedicalRecord>>(medicalRecords, HttpStatus.OK);}  
+    return new ResponseEntity<List<MedicalRecord>>(medicalRecords, HttpStatus.FOUND);}  
   }
 
 }

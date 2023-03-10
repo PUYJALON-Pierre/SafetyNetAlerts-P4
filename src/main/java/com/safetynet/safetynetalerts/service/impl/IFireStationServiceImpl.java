@@ -21,6 +21,7 @@ import com.safetynet.safetynetalerts.model.FireStation;
 import com.safetynet.safetynetalerts.model.JsonDataBase;
 import com.safetynet.safetynetalerts.model.Person;
 import com.safetynet.safetynetalerts.service.IFireStationService;
+import com.safetynet.safetynetalerts.util.AgeCalculator;
 
 @Service
 public class IFireStationServiceImpl implements IFireStationService {
@@ -112,9 +113,13 @@ public class IFireStationServiceImpl implements IFireStationService {
 
   @Override
   public List<PersonsByAddressInfosDTO> findAllPersonsSortedByAddressAndStation(
-      String stationNumber) {
-    logger.debug("Start finding persons from station {} sorted by address", stationNumber);
+      List <String> stationNumberList) {
+    logger.debug("Start finding persons for stations {} sorted by address", stationNumberList);
     List<PersonsByAddressInfosDTO> personsByStationSortByAddress = new ArrayList<>();
+    
+    for(String stationNumber : stationNumberList){
+    
+
     List<Person> personsByStation = findPersonsByStation(stationNumber);
 
     //in order to sort by address (useless??)
@@ -123,12 +128,17 @@ public class IFireStationServiceImpl implements IFireStationService {
     });
     logger.info("Creating information of person from station number {} ",  stationNumber);
     for (Person person : personsByStation) {
+   
+      //To calculate age before setting it
+      
+      AgeCalculator ageCalculator = new AgeCalculator();
+
       PersonsByAddressInfosDTO personSortByAddressDTO = PersonsByAddressInfosDTO.builder()
           .address(person.getAddress()).lastName(person.getLastName())
           .firstName(person.getFirstName()).phoneNumber(person.getPhone())
-          .birthdate(person.getMedicalRecord().getBirthdate())
+          .age(ageCalculator.CalculateAge(person.getMedicalRecord().getBirthdate()))
           .medications(person.getMedicalRecord().getMedications())
-          .allergies(person.getMedicalRecord().getAllergies()).stationNumber(stationNumber).build();
+          .allergies(person.getMedicalRecord().getAllergies()).build();
 
       personsByStationSortByAddress.add(personSortByAddressDTO);
     }
@@ -136,7 +146,7 @@ public class IFireStationServiceImpl implements IFireStationService {
     if (personsByStationSortByAddress.isEmpty()) {
       logger.error("Error, no persons found for station number : {}", stationNumber);
     }
-
+    }
     return personsByStationSortByAddress;
   }
 
@@ -156,11 +166,11 @@ public class IFireStationServiceImpl implements IFireStationService {
     logger.info("Searching adults and children from station number {} ",  stationNumber);
     for (Person person : personsByStation) {
 
-      PersonCoveredByStationNumberDTO personDTO = PersonCoveredByStationNumberDTO.builder()
+      PersonCoveredByStationNumberDTO personCoveredByStationNumberDTO = PersonCoveredByStationNumberDTO.builder()
           .lastName(person.getLastName()).firstName(person.getFirstName())
           .address(person.getAddress()).phoneNumber(person.getPhone()).build();
 
-      personsByStationWithInfos.add(personDTO);
+      personsByStationWithInfos.add(personCoveredByStationNumberDTO);
 
       // checking if person is a child by calculating age
       Date birthdate = null;

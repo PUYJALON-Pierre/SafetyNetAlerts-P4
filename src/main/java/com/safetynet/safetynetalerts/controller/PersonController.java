@@ -40,7 +40,7 @@ public class PersonController {
 
     if (personToAdd == null) {
       logger.error("Error during adding person");
-      return new ResponseEntity<Person>(personToAdd, HttpStatus.NOT_FOUND);
+      return new ResponseEntity<Person>(personToAdd, HttpStatus.BAD_REQUEST);
     } else {
       logger.info("Creation of person completed or already existing");
       return new ResponseEntity<Person>(personToAdd, HttpStatus.CREATED);
@@ -54,7 +54,7 @@ public class PersonController {
     logger.debug("PutMapping person {} ", personUpdate);
     Person personToUpdate = iPersonService.updatePerson(personUpdate);
 
-    if (personUpdate == null) {
+    if (personToUpdate == null) {
       logger.error("Error during person update");
       return new ResponseEntity<Person>(personToUpdate, HttpStatus.NOT_FOUND);
     } else {
@@ -74,7 +74,7 @@ public class PersonController {
     Person personToDelete = iPersonService.deletePerson(firstName, lastName);
     if (personToDelete== null) {
       logger.error("Error during deleting person");
-      return new ResponseEntity<Person>(personToDelete, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<Person>(personToDelete, HttpStatus.NOT_FOUND);
     } 
     else {
       logger.info("Person deleting successfully");
@@ -94,71 +94,12 @@ public class PersonController {
 
     if (persons.isEmpty()) {
       logger.error("Error during recuperation of persons");
-      return new ResponseEntity<List<Person>>(persons, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<List<Person>>(persons, HttpStatus.NOT_FOUND);
     }
-    else {logger.info("Persons list created");
-    return new ResponseEntity<List<Person>>(persons, HttpStatus.CREATED);}
+    else {logger.info("Persons list founded");
+    return new ResponseEntity<List<Person>>(persons, HttpStatus.FOUND);}
   }
 
-  // Retrieve Children at an address (URL n°2)  
-  @GetMapping("/childAlert")
-  public ResponseEntity<List<ChildDTO>> findChildByAddress(@RequestParam (value = "address") String address) {
-    logger.debug("GetMapping of children at address : {}", address);
-   
-    List<ChildDTO> childDTO = iPersonService.findChildByAddress(address);
-    if (childDTO == null) {
-     logger.error("Error finding children at address : {}", address);
-      return new ResponseEntity<List<ChildDTO>>(childDTO, HttpStatus.BAD_REQUEST);
-    } 
-    else {
-      logger.info("Children list at address : {} created", address);
-      return new ResponseEntity<List<ChildDTO>>(childDTO, HttpStatus.CREATED);}
-  }
-  
-  // Retrieve persons by address with station number (URL n°4) 
-  @GetMapping("/fire")
-  public ResponseEntity<List<PersonsByAddressInfosDTO>> findPersonsByAddressWithInfos(
-      @RequestParam (value = "address") String address) {
-    logger.debug("GetMapping of persons by address with informations");
-    
-    List<PersonsByAddressInfosDTO> personByAddressInfos =iPersonService.findPersonsByAddressWithInfos(address);
-    if (personByAddressInfos == null) {
-      logger.error("Error finding persons informations at address : {}", address);
-       return new ResponseEntity<List<PersonsByAddressInfosDTO>>(personByAddressInfos, HttpStatus.BAD_REQUEST);
-     } else {
-    logger.info("Persons informations at address : {} created", address);
-    return new ResponseEntity<List<PersonsByAddressInfosDTO>>(personByAddressInfos, HttpStatus.CREATED);}
-  }
 
-  // Retrieve all person informations (URL n°6) pas certain d'ecriture uri trier par firstname et lastname???
-  @GetMapping("/personInfo")
-  public ResponseEntity<List<PersonInfoDTO>> findAllPersonsInfo () {
-    logger.debug("GetMapping of all persons informations");
-    List<PersonInfoDTO> personInfoDTO =iPersonService.findAllPersonsInfo();
-    
-    if (personInfoDTO == null) {
-      logger.error("Error finding persons informations at address ");
-       return new ResponseEntity<List<PersonInfoDTO>>(personInfoDTO, HttpStatus.BAD_REQUEST);
-     } else {
-       logger.info("Persons informations at address : {} created");
-       return new ResponseEntity<List<PersonInfoDTO>>(personInfoDTO, HttpStatus.CREATED);
-     }
-  }
-
-  // Retrieve all mails (URL n°7)
-  @GetMapping("/communityEmail")
-  public ResponseEntity<List<EmailDTO>> findAllEmail(@RequestParam String city) {
-    logger.debug("GetMapping of all email of inhabitants");
-    List<EmailDTO> emailDTO = iPersonService.findAllEmailByCity(city);
-    
-    if (emailDTO == null) {
-      logger.error("Error finding persons email ");
-      return new ResponseEntity<List<EmailDTO>>(emailDTO, HttpStatus.BAD_REQUEST);
-    }
-    else {
-      logger.info("Persons email list created");
-      return new ResponseEntity<List<EmailDTO>>(emailDTO, HttpStatus.CREATED);
-    }
-  }
 
 }

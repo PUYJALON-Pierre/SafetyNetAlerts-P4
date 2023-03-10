@@ -25,7 +25,7 @@ public interface IFireStationService {
   public FireStation deleteFireStation(String address, String stationNumber);
 
   /*Create list of all people covered by a FireStations*/
-  public List <PersonsByAddressInfosDTO> findAllPersonsSortedByAddressAndStation(String stationNumber);
+  public List <PersonsByAddressInfosDTO> findAllPersonsSortedByAddressAndStation(List<String> stationNumberList);
 
   /*Create list of string of all people covered by a FireStation number with informations*/
   public PersonsByStationWithCountOfAdultAndChildDTO findPersonsByStationWithAdultAndChildCount(String stationNumber);

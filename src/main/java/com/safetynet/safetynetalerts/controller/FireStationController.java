@@ -39,7 +39,7 @@ public class FireStationController {
 
     if (fireStationToAdd == null) {
       logger.error("Error during adding firestation");
-      return new ResponseEntity<FireStation>(fireStationToAdd, HttpStatus.NOT_FOUND);
+      return new ResponseEntity<FireStation>(fireStationToAdd, HttpStatus.BAD_REQUEST);
     } else {
       logger.info("Creation of firestation completed or already existing");
       return new ResponseEntity<FireStation>(fireStationToAdd, HttpStatus.CREATED);
@@ -72,7 +72,7 @@ public class FireStationController {
 
     if (fireStationToDelete == null) {
       logger.error("Error during deleting firestation");
-      return new ResponseEntity<FireStation>(fireStationToDelete, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<FireStation>(fireStationToDelete, HttpStatus.NOT_FOUND);
     }
 
     else {
@@ -92,64 +92,13 @@ public class FireStationController {
 
     if (fireStations.isEmpty()) {
       logger.error("Error during recuperation of firestations");
-      return new ResponseEntity<List<FireStation>>(fireStations, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<List<FireStation>>(fireStations, HttpStatus.NOT_FOUND);
     } else {
     logger.info("Firestation list found");
-    return new ResponseEntity<List<FireStation>>(fireStations, HttpStatus.OK);}
+    return new ResponseEntity<List<FireStation>>(fireStations, HttpStatus.FOUND);}
   }
 
-  // Retrieve PersonsByStation WithCount Of Adult And Children(URL n°1) 
-  @GetMapping("/firestation")
-  public ResponseEntity<PersonsByStationWithCountOfAdultAndChildDTO> findPersonsByStationWithAdultAndChildCount(
-      @RequestParam(value = "stationNumber") String stationNumber) {
-    logger.debug("GetMapping of all firestations");
 
-    PersonsByStationWithCountOfAdultAndChildDTO personsByStationWithCountOfAdultAndChildDTO = iFireStationService
-        .findPersonsByStationWithAdultAndChildCount(stationNumber);
 
-    if (personsByStationWithCountOfAdultAndChildDTO == null) {
-      logger.error("Error during recuperation of persons by station with adult and children");
-      return new ResponseEntity<PersonsByStationWithCountOfAdultAndChildDTO>(personsByStationWithCountOfAdultAndChildDTO,
-          HttpStatus.BAD_REQUEST);
-    } else {
-    logger.info("Persons by station with adult and children count created");
-    return new ResponseEntity<PersonsByStationWithCountOfAdultAndChildDTO>(personsByStationWithCountOfAdultAndChildDTO,
-        HttpStatus.CREATED);}
-
-  }
-
-  // Retrieve phoneNumbers by stations(URL n°3)
-  @GetMapping("/phoneAlert") 
-  public ResponseEntity<List<PhoneNumberDTO>> findPhoneNumbersByStation(
-      @RequestParam(value = "stationNumber") String stationNumber) {
-    logger.debug("GetMapping of all phonenumbers for firestations number : {}", stationNumber);
-
-    List<PhoneNumberDTO> phoneNumberDTO = iFireStationService
-        .findPhoneNumbersByStation(stationNumber);
-
-    if (phoneNumberDTO == null) {
-      logger.error("Error during recuperation of person's phonenumbers by station");
-      return new ResponseEntity<List<PhoneNumberDTO>>(phoneNumberDTO, HttpStatus.BAD_REQUEST);
-    } else {
-    logger.info("Persons by station with adult and children count created");
-    return new ResponseEntity<List<PhoneNumberDTO>>(phoneNumberDTO, HttpStatus.CREATED);}
-  }
-
-  
-  // Retrieve Persons by station sort by address (URL n°5)
-  @GetMapping("/flood") 
-  public ResponseEntity<List<PersonsByAddressInfosDTO>> findAllPersonsSortedByAddressAndStation(
-      @RequestParam(value = "stationNumber") String stationNumber) {
-    logger.debug("GetMapping of all persons covered by station number : {} , sort by address", stationNumber);
-    List<PersonsByAddressInfosDTO> personsByAddressInfosDTO = iFireStationService.findAllPersonsSortedByAddressAndStation(stationNumber);
-    
-    if (personsByAddressInfosDTO == null) {
-      logger.error("Error during recuperation of persons covered by station number : {}", stationNumber);
-      return new ResponseEntity<List<PersonsByAddressInfosDTO>>(personsByAddressInfosDTO, HttpStatus.BAD_REQUEST);
-    } else {
-    logger.info("Persons sorted by address and covered by station number : {} created" ,stationNumber);
-    return new ResponseEntity<List<PersonsByAddressInfosDTO>>(personsByAddressInfosDTO, HttpStatus.CREATED);}
-    
-  }
 
 }

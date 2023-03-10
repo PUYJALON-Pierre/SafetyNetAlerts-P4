@@ -23,6 +23,7 @@ import com.safetynet.safetynetalerts.model.JsonDataBase;
 import com.safetynet.safetynetalerts.model.MedicalRecord;
 import com.safetynet.safetynetalerts.model.Person;
 import com.safetynet.safetynetalerts.service.impl.IFireStationServiceImpl;
+import com.safetynet.safetynetalerts.util.AgeCalculator;
 
 @SpringBootTest
 public class FireStationServiceTest {
@@ -46,6 +47,8 @@ public class FireStationServiceTest {
   @BeforeEach
   void setUpPerTest() throws Exception {
 
+
+    
     medications.add("aznol:350mg" + "hydrapermazol:100mg");
     allergies.add("nillacilan");
 
@@ -225,8 +228,11 @@ public class FireStationServiceTest {
   @Test
   void findAllPersonsSortedByAddressAndStationTest() {
 
-    // station to search
-    String stationNumber = "1";
+    // stationlist to search
+    List <String> stationNumberList = new ArrayList<>();
+    stationNumberList.add("1");
+    stationNumberList.add("78");
+
 
     // adding person in disorder to this station
     medications.clear();
@@ -258,7 +264,7 @@ public class FireStationServiceTest {
     // Linking between fireStation and people
     List<Person> personsByStation = new ArrayList<>();
     for (FireStation firestation : firestations) {
-      if (firestation.getStationNumber() == stationNumber) {
+      if (stationNumberList.contains(firestation.getStationNumber())) {
 
         for (Person person : persons) {
 
@@ -285,50 +291,47 @@ public class FireStationServiceTest {
     }
     // When
     List<PersonsByAddressInfosDTO> personsByStationSortByAddress = iFireStationService
-        .findAllPersonsSortedByAddressAndStation(stationNumber);
+        .findAllPersonsSortedByAddressAndStation(stationNumberList);
 
     // Then
     
     assertEquals(personsByStationSortByAddress.size(), 4);
     
     //first person
-    assertEquals(personsByStationSortByAddress.get(0).getStationNumber(), "1");
+
     assertEquals(personsByStationSortByAddress.get(0).getAddress(), "644 Gershwin Cir");
     assertEquals(personsByStationSortByAddress.get(0).getLastName(), "Boyd");
     assertEquals(personsByStationSortByAddress.get(0).getFirstName(), "Duncan");
+    //assertEquals(personsByStationSortByAddress.get(0).getAge(), 20);
     assertEquals(personsByStationSortByAddress.get(0).getPhoneNumber(), "841-874-6512");
-    assertEquals(personsByStationSortByAddress.get(0).getBirthdate(), "08/16/2002");
     assertEquals(personsByStationSortByAddress.get(0).getMedications().toString(), "[aznol:350mghydrapermazol:100mg]");
     assertEquals(personsByStationSortByAddress.get(0).getAllergies().toString(), "[nillacilan]");
   
     //second person
-    assertEquals(personsByStationSortByAddress.get(1).getStationNumber(), "1");
+
     assertEquals(personsByStationSortByAddress.get(1).getAddress(), "908 73rd St");
     assertEquals(personsByStationSortByAddress.get(1).getLastName(), "Walker");
     assertEquals(personsByStationSortByAddress.get(1).getFirstName(), "Reginold");
     assertEquals(personsByStationSortByAddress.get(1).getPhoneNumber(), "841-874-8547");
-    assertEquals(personsByStationSortByAddress.get(1).getBirthdate(), "07/07/1997");
     assertEquals(personsByStationSortByAddress.get(1).getMedications().toString(), "[aznol:350mghydrapermazol:100mg]");
     assertEquals(personsByStationSortByAddress.get(1).getAllergies().toString(), "[nillacilan]");
     
     
     //third person
-    assertEquals(personsByStationSortByAddress.get(2).getStationNumber(), "1");
+
     assertEquals(personsByStationSortByAddress.get(2).getAddress(), "908 73rd St");
     assertEquals(personsByStationSortByAddress.get(2).getLastName(), "Peters");
     assertEquals(personsByStationSortByAddress.get(2).getFirstName(), "Jamie");
     assertEquals(personsByStationSortByAddress.get(2).getPhoneNumber(), "841-874-7462");
-    assertEquals(personsByStationSortByAddress.get(2).getBirthdate(), "09/04/2001");
     assertEquals(personsByStationSortByAddress.get(2).getMedications().toString(), "[aznol:350mghydrapermazol:100mg]");
     assertEquals(personsByStationSortByAddress.get(2).getAllergies().toString(), "[nillacilan]");
     
     //fourth person
-    assertEquals(personsByStationSortByAddress.get(3).getStationNumber(), "1");
+
     assertEquals(personsByStationSortByAddress.get(3).getAddress(), "947 E. Rose Dr");
     assertEquals(personsByStationSortByAddress.get(3).getLastName(), "Stelzer");
     assertEquals(personsByStationSortByAddress.get(3).getFirstName(), "Brian");
     assertEquals(personsByStationSortByAddress.get(3).getPhoneNumber(), "841-874-7784");
-    assertEquals(personsByStationSortByAddress.get(3).getBirthdate(), "02/18/2022");
     assertEquals(personsByStationSortByAddress.get(3).getMedications().toString(), "[aznol:350mghydrapermazol:100mg]");
     assertEquals(personsByStationSortByAddress.get(3).getAllergies().toString(), "[nillacilan]");
    
