@@ -5,7 +5,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +23,6 @@ import com.safetynet.safetynetalerts.DTO.PersonInfoDTO;
 import com.safetynet.safetynetalerts.DTO.PersonsByAddressInfosDTO;
 import com.safetynet.safetynetalerts.DTO.PersonsByStationWithCountOfAdultAndChildDTO;
 import com.safetynet.safetynetalerts.DTO.PersonsListByAddressWithStationDTO;
-import com.safetynet.safetynetalerts.DTO.PhoneNumberDTO;
 import com.safetynet.safetynetalerts.model.FireStation;
 import com.safetynet.safetynetalerts.model.JsonDataBase;
 import com.safetynet.safetynetalerts.model.Person;
@@ -31,319 +32,286 @@ import com.safetynet.safetynetalerts.service.IPersonService;
 @WebMvcTest(controllers = UrlController.class)
 public class UrlControllerTest {
 
-
   @Autowired
   private MockMvc mockMvc;
-  
+
   @MockBean
-  private  IPersonService iPersonService;
-  
+  private IPersonService iPersonService;
+
   @MockBean
-  private  JsonDataBase jsonDataBase;
-  
+  private JsonDataBase jsonDataBase;
+
   @MockBean
-  private  IFireStationService iFireStationService;
-  
-  List<Person> persons =new ArrayList<>();
-  
-  List<FireStation> firestations =new ArrayList<>();
-  
-  
-  
-  
+  private IFireStationService iFireStationService;
+
+  List<Person> persons = new ArrayList<>();
+
+  List<FireStation> firestations = new ArrayList<>();
+
   @Test
   public void findPersonsByStationWithAdultAndChildCount_FoundTest() throws Exception {
-    //mock the data return by service class
 
+    // Given
     List<PersonCoveredByStationNumberDTO> personCoveredByStationNumberDTOs = new ArrayList<>();
     personCoveredByStationNumberDTOs.isEmpty();
-    PersonsByStationWithCountOfAdultAndChildDTO personsByStationWithCountOfAdultAndChildDTO = PersonsByStationWithCountOfAdultAndChildDTO.builder().numberAdult(0).numberChildren(0).personListByStationNumber(personCoveredByStationNumberDTOs).build()
-;    
+    PersonsByStationWithCountOfAdultAndChildDTO personsByStationWithCountOfAdultAndChildDTO = PersonsByStationWithCountOfAdultAndChildDTO
+        .builder().numberAdult(0).numberChildren(0)
+        .personListByStationNumber(personCoveredByStationNumberDTOs).build();
 
-    when(iFireStationService.findPersonsByStationWithAdultAndChildCount("1")).thenReturn(personsByStationWithCountOfAdultAndChildDTO);
-    
-    //create a mock http request to verify the expected result
-    mockMvc.perform(get("/firestation")
-    .param("stationNumber", "1")
-    .contentType(MediaType.APPLICATION_JSON))
-    .andExpect(status().isFound());
+    // When
+    when(iFireStationService.findPersonsByStationWithAdultAndChildCount("1"))
+        .thenReturn(personsByStationWithCountOfAdultAndChildDTO);
+
+    // Then
+    mockMvc
+        .perform(
+            get("/firestation").param("stationNumber", "1").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isFound());
   }
-  
 
   @Test
   public void findPersonsByStationWithAdultAndChildCount_NotFoundTest() throws Exception {
-    //mock the data return by service class
 
+    // Given
     List<PersonCoveredByStationNumberDTO> personCoveredByStationNumberDTOs = new ArrayList<>();
     personCoveredByStationNumberDTOs.isEmpty();
     PersonsByStationWithCountOfAdultAndChildDTO personsByStationWithCountOfAdultAndChildDTO = null;
-    when(iFireStationService.findPersonsByStationWithAdultAndChildCount("1")).thenReturn(personsByStationWithCountOfAdultAndChildDTO);
-    
-    //create a mock http request to verify the expected result
-    mockMvc.perform(get("/firestation")
-    .param("stationNumber", "1")
-    .contentType(MediaType.APPLICATION_JSON))
-    .andExpect(status().isNotFound());
+
+    // When
+    when(iFireStationService.findPersonsByStationWithAdultAndChildCount("1"))
+        .thenReturn(personsByStationWithCountOfAdultAndChildDTO);
+
+    // Then
+    mockMvc
+        .perform(
+            get("/firestation").param("stationNumber", "1").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
   }
 
-  
-  
-  
-  
   @Test
   public void ChildAlert_FoundTest() throws Exception {
-    //mock the data return by service class
 
+    // Given
     List<ChildDTO> childrenList = new ArrayList<>();
-    childrenList.add(ChildDTO.builder().firstName("John").lastName("Boyd").age(10).personsAtSameHouse(null).build());
-    
-    
+    childrenList.add(ChildDTO.builder().firstName("John").lastName("Boyd").age(10)
+        .personsAtSameHouse(null).build());
+
+    // When
     when(iPersonService.findChildByAddress("1509 Culver St")).thenReturn(childrenList);
-    
-    //create a mock http request to verify the expected result
-    mockMvc.perform(get("/childAlert")
-    .param("address", "1509 Culver St")
-    .contentType(MediaType.APPLICATION_JSON))
-    .andExpect(status().isFound());
+
+    // Then
+    mockMvc.perform(get("/childAlert").param("address", "1509 Culver St")
+        .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isFound());
   }
-  
+
   @Test
   public void ChildAlert_NotFoundTest() throws Exception {
-    //mock the data return by service class
 
+    // Given
     List<ChildDTO> childrenList = null;
- 
-    when(iPersonService.findChildByAddress("1509 Culver St")).thenReturn(childrenList);
-    
-    //create a mock http request to verify the expected result
-    mockMvc.perform(get("/childAlert")
-    .param("address", "1509 Culver St")
-    .contentType(MediaType.APPLICATION_JSON))
 
-    .andExpect(status().isNotFound());
+    // When
+    when(iPersonService.findChildByAddress("1509 Culver St")).thenReturn(childrenList);
+
+    // Then
+    mockMvc.perform(get("/childAlert").param("address", "1509 Culver St")
+        .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isNotFound());
   }
-  
-  
-  
-  
-  
+
   @Test
   public void findPhoneNumbersByStation_FoundTest() throws Exception {
-    //mock the data return by service class
 
-    List<PhoneNumberDTO> phoneNumberDTOs = new ArrayList<>();
+    // Given
+    Set<String> phoneNumberDTOs = new HashSet<>();
 
-    phoneNumberDTOs.add(PhoneNumberDTO.builder().firstName("Jacob").lastName("Boyd").phoneNumber("444-5555-556").build());
-    phoneNumberDTOs.add(PhoneNumberDTO.builder().firstName("John").lastName("Boyd").phoneNumber("777-7777-777").build());
-    
-    
+    phoneNumberDTOs.add("444-5555-556");
+    phoneNumberDTOs.add("777-7777-777");
+
+    // When
     when(iFireStationService.findPhoneNumbersByStation("1")).thenReturn(phoneNumberDTOs);
-    
-    //create a mock http request to verify the expected result
-    mockMvc.perform(get("/phoneAlert")
-    .param("firestation", "1")
-    .contentType(MediaType.APPLICATION_JSON))
-    .andExpect(status().isFound());
+
+    // Then
+    mockMvc
+        .perform(
+            get("/phoneAlert").param("firestation", "1").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isFound());
   }
-  
-  
+
   @Test
   public void findPhoneNumbersByStation_NotFoundTest() throws Exception {
-    //mock the data return by service class
 
-    List<PhoneNumberDTO> phoneNumberDTOs = null;
-    
+    // Given
+    Set<String> phoneNumberDTOs = null;
+
+    // When
     when(iFireStationService.findPhoneNumbersByStation("1")).thenReturn(phoneNumberDTOs);
-    
-    //create a mock http request to verify the expected result
-    mockMvc.perform(get("/phoneAlert")
-    .param("firestation", "1")
-    .contentType(MediaType.APPLICATION_JSON))
-    .andExpect(status().isNotFound());
+
+    // Then
+    mockMvc
+        .perform(
+            get("/phoneAlert").param("firestation", "1").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
   }
-  
- 
+
   @Test
   public void findPersonByAddressWithInfo_FoundTest() throws Exception {
-    //mock the data return by service class
 
+    // Given
     List<PersonsByAddressInfosDTO> personsByAddressInfosDTOs = new ArrayList<>();
-  personsByAddressInfosDTOs.add(PersonsByAddressInfosDTO.builder().address("1509 Culver St").firstName("John").lastName("Boyd").phoneNumber("454-555-555").age(10).medications(null).allergies(null).build());
-    
-  personsByAddressInfosDTOs.add(PersonsByAddressInfosDTO.builder().address("1509 Culver St").firstName("Jacob").lastName("Boyd").phoneNumber("444-555-222").age(78).medications(null).allergies(null).build());
-  
-  PersonsListByAddressWithStationDTO personsListByAddressWithStationDTO = PersonsListByAddressWithStationDTO.builder().stationNumber("1").personsByAddressInfo(personsByAddressInfosDTOs).build();
 
-  
-  
-    when(iPersonService.findPersonsByAddressWithInfos("1509 Culver St")).thenReturn(personsListByAddressWithStationDTO);
-    
-    //create a mock http request to verify the expected result
-    mockMvc.perform(get("/fire")
-    .param("address", "1509 Culver St")
-    .contentType(MediaType.APPLICATION_JSON))
-    .andExpect(status().isFound());
+    personsByAddressInfosDTOs.add(PersonsByAddressInfosDTO.builder().address("1509 Culver St")
+        .firstName("John").lastName("Boyd").phoneNumber("454-555-555").age(10).medications(null)
+        .allergies(null).build());
+
+    personsByAddressInfosDTOs.add(PersonsByAddressInfosDTO.builder().address("1509 Culver St")
+        .firstName("Jacob").lastName("Boyd").phoneNumber("444-555-222").age(78).medications(null)
+        .allergies(null).build());
+
+    PersonsListByAddressWithStationDTO personsListByAddressWithStationDTO = PersonsListByAddressWithStationDTO
+        .builder().stationNumber("1").personsByAddressInfo(personsByAddressInfosDTOs).build();
+
+    // When
+    when(iPersonService.findPersonsByAddressWithInfos("1509 Culver St"))
+        .thenReturn(personsListByAddressWithStationDTO);
+
+    // Then
+    mockMvc
+        .perform(
+            get("/fire").param("address", "1509 Culver St").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isFound());
   }
-  
-  
+
   @Test
   public void findPersonByAddressWithInfo_NotFoundTest() throws Exception {
-    //mock the data return by service class
 
-    PersonsListByAddressWithStationDTO personsListByAddressWithStationDTO = null; 
-  
-    when(iPersonService.findPersonsByAddressWithInfos("1509 Culver St")).thenReturn(personsListByAddressWithStationDTO);
-    
-    //create a mock http request to verify the expected result
-    mockMvc.perform(get("/fire")
-    .param("address", "1509 Culver St")
-    .contentType(MediaType.APPLICATION_JSON))
+    // Given
+    PersonsListByAddressWithStationDTO personsListByAddressWithStationDTO = null;
 
-    .andExpect(status().isNotFound());
+    // When
+    when(iPersonService.findPersonsByAddressWithInfos("1509 Culver St"))
+        .thenReturn(personsListByAddressWithStationDTO);
+
+    // Then
+    mockMvc
+        .perform(
+            get("/fire").param("address", "1509 Culver St").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
   }
-  
-  
-  
-  
+
   @Test
   public void findAllPersonsSortedByAddressAndStation_FoundTest() throws Exception {
-    //mock the data return by service class
+
+    // Given
     List<String> stationNumberList = new ArrayList<>();
-   stationNumberList.add("1");
-   stationNumberList.add("4");
+    stationNumberList.add("1");
+    stationNumberList.add("4");
+
     List<PersonsByAddressInfosDTO> personsByAddressInfosDTOs = new ArrayList<>();
 
- personsByAddressInfosDTOs.add(PersonsByAddressInfosDTO.builder().address("1509 Culver St").firstName("John").lastName("Boyd").phoneNumber("444-4444-444").age(10).medications(null).allergies(null).build());
- personsByAddressInfosDTOs.add(PersonsByAddressInfosDTO.builder().address("1509 Culver St").firstName("Jacob").lastName("Boyd").phoneNumber("777-7777-777").age(11).medications(null).allergies(null).build());
-    when(iFireStationService.findAllPersonsSortedByAddressAndStation(stationNumberList)).thenReturn(personsByAddressInfosDTOs);
-    
-    //create a mock http request to verify the expected result
-    mockMvc.perform(get("/flood")
-    .param("stations","1")
-    .param("stations","4")
-    .contentType(MediaType.APPLICATION_JSON))
-    .andExpect(status().isFound());
+    personsByAddressInfosDTOs.add(PersonsByAddressInfosDTO.builder().address("1509 Culver St")
+        .firstName("John").lastName("Boyd").phoneNumber("444-4444-444").age(10).medications(null)
+        .allergies(null).build());
+    personsByAddressInfosDTOs.add(PersonsByAddressInfosDTO.builder().address("1509 Culver St")
+        .firstName("Jacob").lastName("Boyd").phoneNumber("777-7777-777").age(11).medications(null)
+        .allergies(null).build());
+
+    // When
+    when(iFireStationService.findAllPersonsSortedByAddressAndStation(stationNumberList))
+        .thenReturn(personsByAddressInfosDTOs);
+
+    // Then
+    mockMvc.perform(get("/flood").param("stations", "1").param("stations", "4")
+        .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isFound());
   }
-  
-  
 
   @Test
   public void findAllPersonsSortedByAddressAndStation_NotFoundTest() throws Exception {
-    //mock the data return by service class
-    
+
+    // Given
     List<String> stationNumberList = new ArrayList<>();
     stationNumberList.add("1");
     stationNumberList.add("4");
     List<PersonsByAddressInfosDTO> personsByAddressInfosDTOs = null;
-    
-    when(iFireStationService.findAllPersonsSortedByAddressAndStation(stationNumberList)).thenReturn(personsByAddressInfosDTOs);
-    
-    //create a mock http request to verify the expected result
-    mockMvc.perform(get("/flood")
-        .param("stations","1")
-        .param("stations","4")
-    .contentType(MediaType.APPLICATION_JSON))
 
-    .andExpect(status().isNotFound());
+    // When
+    when(iFireStationService.findAllPersonsSortedByAddressAndStation(stationNumberList))
+        .thenReturn(personsByAddressInfosDTOs);
+
+    // Then
+    mockMvc
+        .perform(get("/flood").param("stations", "1").param("stations", "4")
+            .contentType(MediaType.APPLICATION_JSON))
+
+        .andExpect(status().isNotFound());
   }
-  
-  
-  
-  
-  
+
   @Test
   public void findAllPersonInfos_FoundTest() throws Exception {
-    //mock the data return by service class
+
+    // Given
     String firstName = "John";
     String lastName = "Boyd";
-    
-   PersonInfoDTO personInfoDTO = PersonInfoDTO.builder().firstName("John").lastName("Boyd").address("1509 Culver St").age(100).email("jhsdg@gmail.com").medications(null).allergies(null).build();
+    List<PersonInfoDTO> personsInfos = new ArrayList<>();
 
-  
- 
-    when(iPersonService.findAllPersonInfo(firstName, lastName)).thenReturn(personInfoDTO);
-    
-    //create a mock http request to verify the expected result
-    mockMvc.perform(get("/personInfo")
-    .param("firstName", "John")
-    .param("lastName","Boyd")
-    .contentType(MediaType.APPLICATION_JSON))
-    .andExpect(status().isFound());
+    // When
+    when(iPersonService.findAllPersonInfo(firstName, lastName)).thenReturn(personsInfos);
+
+    // Then
+    mockMvc.perform(get("/personInfo").param("firstName", "John").param("lastName", "Boyd")
+        .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isFound());
   }
-  
-  
-  
+
   @Test
   public void findAllPersonInfos_NotFoundTest() throws Exception {
-    //mock the data return by service class
+
+    // Given
     String firstName = "John";
     String lastName = "Boyd";
-    
-   PersonInfoDTO personInfoDTO = null;
+    List<PersonInfoDTO> personsInfos = null;
 
-  
-    when(iPersonService.findAllPersonInfo(firstName, lastName)).thenReturn(personInfoDTO);
-    
-    //create a mock http request to verify the expected result
-    mockMvc.perform(get("/personInfo")
-    .param("firstName", "John")
-    .param("lastName","Boyd")
-    .contentType(MediaType.APPLICATION_JSON))
-    .andExpect(status().isNotFound());
+    // When
+    when(iPersonService.findAllPersonInfo(firstName, lastName)).thenReturn(personsInfos);
+
+    // Then
+    mockMvc.perform(get("/personInfo").param("firstName", "John").param("lastName", "Boyd")
+        .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isNotFound());
   }
-  
-  
-  
+
   @Test
   public void findAllEmailByCity_FoundTest() throws Exception {
-    //mock the data return by service class
+
+    // Given
     List<EmailDTO> emailDTOs = new ArrayList<>();
-    
-  emailDTOs.add(EmailDTO.builder().email("fdher@gmail.com").build());
-    
- emailDTOs.add(EmailDTO.builder().email("djfhe@gmail.com").build());
-  
-    
+
+    emailDTOs.add(EmailDTO.builder().email("fdher@gmail.com").build());
+
+    emailDTOs.add(EmailDTO.builder().email("djfhe@gmail.com").build());
+
+    // When
     when(iPersonService.findAllEmailByCity("Culver")).thenReturn(emailDTOs);
-    
-    //create a mock http request to verify the expected result
-    mockMvc.perform(get("/communityEmail")
-    .param("city", "Culver")
-    .contentType(MediaType.APPLICATION_JSON))
-    .andExpect(status().isFound());
+
+    // Then
+    mockMvc
+        .perform(
+            get("/communityEmail").param("city", "Culver").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isFound());
   }
-  
-  
-  
-  
+
   @Test
   public void findAllEmailByCity_NotFound() throws Exception {
-    //mock the data return by service class
+
+    // Given
     List<EmailDTO> emailDTOs = null;
- 
-    
-    
+
+    // When
     when(iPersonService.findAllEmailByCity("Culver")).thenReturn(emailDTOs);
-    
-    //create a mock http request to verify the expected result
-    mockMvc.perform(get("/communityEmail")
-    .param("city", "Culver")
-    .contentType(MediaType.APPLICATION_JSON))
 
-    .andExpect(status().isNotFound());
+    // Then
+    mockMvc
+        .perform(
+            get("/communityEmail").param("city", "Culver").contentType(MediaType.APPLICATION_JSON))
+
+        .andExpect(status().isNotFound());
   }
-  
-  
-  
-  
-  
-  
-  
-  
-  
 
-  
-  
-  
-  
 }

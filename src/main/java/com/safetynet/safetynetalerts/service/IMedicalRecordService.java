@@ -4,20 +4,52 @@ import java.util.List;
 
 import com.safetynet.safetynetalerts.model.MedicalRecord;
 
+/**
+ * Interface for services operations concerning MedicalRecord
+ *
+ * @author PUYJALON Pierre
+ * @since 11/03/2023
+ */
 public interface IMedicalRecordService {
 
-  /*Create list of all medicalRecords*/
+  /**
+   * Get list of all MedicalRecords from data
+   *
+   * @return List of MedicalRecord
+   */
   public List<MedicalRecord> findAll();
 
-  /*Add a medicalRecord */
+  /**
+   * Save in data a given medicalRecord
+   *
+   * @param medicalRecord - MedicalRecord
+   * @return MedicalRecord
+   */
   public MedicalRecord addMedicalRecord(MedicalRecord medicalRecord);
 
-  /*Update a medicalRecord */
+  /**
+   * Update specific medicalRecord in data with a new medicalRecord
+   *
+   * @param medicalRecordUpdate - MedicalRecord
+   * @return MedicalRecord
+   */
   public MedicalRecord updateMedicalRecord(MedicalRecord medicalRecordUpdate);
 
-  /*Delete a medicalRecord */
+  /**
+   * Delete MedicalRecord from data by firstName and lastName
+   *
+   * @param firstName - String
+   * @param lastName - String
+   * @return MedicalRecord
+   */
   public MedicalRecord deleteMedicalRecord(String firstName, String lastName);
 
-  /*Find a medicalRecord */
+  /**
+   * Find a MedicalRecord from data by firstName and lastName
+   *
+   * @param firstName - String
+   * @param lastName - String
+   * @return MedicalRecord
+   */
   public MedicalRecord findMedicalRecordByName(String firstName, String lastName);
 }

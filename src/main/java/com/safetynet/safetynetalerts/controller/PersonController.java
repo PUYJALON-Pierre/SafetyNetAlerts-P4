@@ -15,13 +15,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.safetynet.safetynetalerts.DTO.ChildDTO;
-import com.safetynet.safetynetalerts.DTO.EmailDTO;
-import com.safetynet.safetynetalerts.DTO.PersonInfoDTO;
-import com.safetynet.safetynetalerts.DTO.PersonsByAddressInfosDTO;
 import com.safetynet.safetynetalerts.model.Person;
 import com.safetynet.safetynetalerts.service.IPersonService;
 
+/**
+ * Controller class for persons CRUD Endpoints
+ *
+ * @author PUYJALON Pierre
+ * @since 11/03/2023
+ */
 @RestController
 public class PersonController {
 
@@ -30,9 +32,12 @@ public class PersonController {
   @Autowired
   private IPersonService iPersonService;
 
-  /************** ENDPOINT FOR UPDATING DATA ***************/
-
-  // Add new person
+  /**
+   * Adding new Person
+   *
+   * @param person - Person object to add
+   * @return ResponseEntity Person
+   */
   @PostMapping(value = "/person")
   public ResponseEntity<Person> addPerson(@RequestBody Person person) {
     logger.debug("PostMapping person {} ", person);
@@ -40,15 +45,19 @@ public class PersonController {
 
     if (personToAdd == null) {
       logger.error("Error during adding person");
-      return new ResponseEntity<Person>(personToAdd, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(personToAdd, HttpStatus.BAD_REQUEST);
     } else {
-      logger.info("Creation of person completed or already existing");
-      return new ResponseEntity<Person>(personToAdd, HttpStatus.CREATED);
+      logger.info("Creation of person completed");
+      return new ResponseEntity<>(personToAdd, HttpStatus.CREATED);
     }
   }
 
-  
-  // UpdatePerson by firstName and lastName
+  /**
+   * Updating existing Person
+   *
+   * @param personUpdate - Person object to update
+   * @return ResponseEntity Person
+   */
   @PutMapping(value = "/person")
   public ResponseEntity<Person> updatePerson(@RequestBody Person personUpdate) {
     logger.debug("PutMapping person {} ", personUpdate);
@@ -56,50 +65,54 @@ public class PersonController {
 
     if (personToUpdate == null) {
       logger.error("Error during person update");
-      return new ResponseEntity<Person>(personToUpdate, HttpStatus.NOT_FOUND);
+      return new ResponseEntity<>(personToUpdate, HttpStatus.NOT_FOUND);
     } else {
       logger.info("Person update successfully");
-      return new ResponseEntity<Person>(personToUpdate, HttpStatus.OK);
+      return new ResponseEntity<>(personToUpdate, HttpStatus.OK);
     }
-  } 
+  }
 
-  
-  // Delete new person by firstName and lastName
+  /**
+   * Delete person by firstName and lastName
+   *
+   * @param firstName - Person firstName
+   * @param lastName - Person lastName
+   * @return ResponseEntity List of Person - Persons deleted
+   */
   @DeleteMapping(value = "/person")
-  public ResponseEntity<Person> deletePersonByFirstName(
+  public ResponseEntity<List<Person>> deletePersonByFirstName(
       @RequestParam(value = "firstName") String firstName,
       @RequestParam(value = "lastName") String lastName) {
     logger.debug("DeleteMapping firstName {} {}", firstName, lastName);
 
-    Person personToDelete = iPersonService.deletePerson(firstName, lastName);
-    if (personToDelete== null) {
+    List<Person> personsToDelete = iPersonService.deletePerson(firstName, lastName);
+    if (personsToDelete == null) {
       logger.error("Error during deleting person");
-      return new ResponseEntity<Person>(personToDelete, HttpStatus.NOT_FOUND);
-    } 
-    else {
+      return new ResponseEntity<>(personsToDelete, HttpStatus.NOT_FOUND);
+    } else {
       logger.info("Person deleting successfully");
-      return new ResponseEntity<Person>(personToDelete, HttpStatus.OK);
+      return new ResponseEntity<>(personsToDelete, HttpStatus.OK);
     }
   }
 
-  /************** SPECIFIED ENDPOINTS **************/
-
-  
-  // Retrieve all person
+  /**
+   * Retrieve all persons
+   *
+   * @return ResponseEntity (List of Person)
+   */
   @GetMapping("/persons")
   public ResponseEntity<List<Person>> getPersons() {
     logger.debug("GetMapping of all persons");
-    
+
     List<Person> persons = iPersonService.findAll();
 
     if (persons.isEmpty()) {
       logger.error("Error during recuperation of persons");
-      return new ResponseEntity<List<Person>>(persons, HttpStatus.NOT_FOUND);
+      return new ResponseEntity<>(persons, HttpStatus.NOT_FOUND);
+    } else {
+      logger.info("Persons list founded");
+      return new ResponseEntity<>(persons, HttpStatus.FOUND);
     }
-    else {logger.info("Persons list founded");
-    return new ResponseEntity<List<Person>>(persons, HttpStatus.FOUND);}
   }
-
-
 
 }

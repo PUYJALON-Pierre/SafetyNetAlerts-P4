@@ -1,27 +1,21 @@
 package com.safetynet.safetynetalerts.service.impl;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import com.safetynet.safetynetalerts.DTO.ChildDTO;
 import com.safetynet.safetynetalerts.DTO.EmailDTO;
 import com.safetynet.safetynetalerts.DTO.PersonInfoDTO;
+import com.safetynet.safetynetalerts.DTO.PersonNameDTO;
 import com.safetynet.safetynetalerts.DTO.PersonsByAddressInfosDTO;
 import com.safetynet.safetynetalerts.DTO.PersonsListByAddressWithStationDTO;
-import com.safetynet.safetynetalerts.DTO.PhoneNumberDTO;
 import com.safetynet.safetynetalerts.model.FireStation;
 import com.safetynet.safetynetalerts.model.JsonDataBase;
 import com.safetynet.safetynetalerts.model.Person;
@@ -38,11 +32,11 @@ public class IPersonServiceImpl implements IPersonService {
 
   @Override
   public List<Person> findAll() {
-    logger.debug(" Start finding all persons");
-    logger.info(" Getting all persons ");
+    logger.debug("Start finding all persons");
+    logger.info("Getting all persons ");
     List<Person> persons = jSonDataBase.getPersons();
     if (persons.isEmpty()) {
-      logger.error("No persons found");
+      logger.error("No persons founded");
     }
     return persons;
   }
@@ -51,16 +45,15 @@ public class IPersonServiceImpl implements IPersonService {
   public Person addPerson(Person personToAdd) {
     logger.debug("Starting adding person");
     List<Person> persons = jSonDataBase.getPersons();
-    boolean anyMatch = persons.stream()
-        .anyMatch(p -> p.getFirstName().equals(personToAdd.getFirstName())
-            && p.getLastName().equals(personToAdd.getLastName()));
-    if (!anyMatch) {
-      logger.info("Person add because not already existing");
-      persons.add(personToAdd);
-      jSonDataBase.setPersons(persons);
-    } else {
-      logger.info("Person not add because already existing");
+
+    logger.info("Person added into database");
+    persons.add(personToAdd);
+    jSonDataBase.setPersons(persons);
+
+    if (personToAdd.equals(null)) {
+      logger.error("Person to add is null");
     }
+
     return personToAdd;
   }
 
@@ -97,52 +90,47 @@ public class IPersonServiceImpl implements IPersonService {
   }
 
   @Override
-  public Person deletePerson(String firstName, String lastName) {
+  public List<Person> deletePerson(String firstName, String lastName) {
 
-    Person personToDelete = findByName(firstName, lastName);
     logger.debug("Deleting person");
+    List<Person> personsSameName = findByName(firstName, lastName);
+    for (Person personToDelete : personsSameName) {
 
-    if (personToDelete != null) {
-      logger.info("Deleting person {} {} ", firstName, lastName);
+      if (personToDelete != null) {
+        logger.info("Deleting person {} {} ", firstName, lastName);
 
-      List<Person> persons = jSonDataBase.getPersons();
-      persons.remove(personToDelete);
-      jSonDataBase.setPersons(persons);
+        List<Person> persons = jSonDataBase.getPersons();
+        persons.remove(personToDelete);
+        jSonDataBase.setPersons(persons);
+      } else {
+        logger.error("Person {} {} not found", firstName, lastName);
+
+      }
     }
-
-    else {
-      logger.error("Person {} {} not found", firstName, lastName);
-
-    }
-    return personToDelete;
+    return personsSameName;
   }
 
   @Override
-  public Person findByName(String firstName, String lastName) {
+  public List<Person> findByName(String firstName, String lastName) {
     logger.debug("Starting finding person by name");
-    Optional<Person> optionalPerson = jSonDataBase.getPersons().stream()
-        .filter(p -> p.getFirstName().equals(firstName) && p.getLastName().equals(lastName))
-        .findAny();
+    List<Person> personsSameName = new ArrayList<>();
 
-    if (optionalPerson.isPresent()) {
-      logger.info("Found person {} {} ", firstName, lastName);
-      return optionalPerson.get();
-    } else {
-      logger.error("Error finding person by firstname {}  and lastname {} , no match", firstName, lastName);
-    }
-    return null;
+    personsSameName = jSonDataBase.getPersons().stream()
+        .filter(p -> (p.getFirstName().equals(firstName) && p.getLastName().equals(lastName)))
+        .collect(Collectors.toList());
+
+    return personsSameName;
   }
 
-  
-  
 //------------------------------------------------------------------------------------------------------
 
   @Override
   public PersonsListByAddressWithStationDTO findPersonsByAddressWithInfos(String address) {
     logger.debug("Starting finding person with informations at address : {}", address);
     /* Create DTO with information to stock and return */
-    PersonsListByAddressWithStationDTO personsListByAddressWithStationDTO = PersonsListByAddressWithStationDTO.builder().stationNumber(null).personsByAddressInfo(null).build();
-    
+    PersonsListByAddressWithStationDTO personsListByAddressWithStationDTO = PersonsListByAddressWithStationDTO
+        .builder().stationNumber(null).personsByAddressInfo(null).build();
+
     List<PersonsByAddressInfosDTO> personsByAddressInfos = new ArrayList<>();
     List<Person> persons = jSonDataBase.getPersons();
     List<FireStation> fireStations = jSonDataBase.getFirestations();
@@ -152,12 +140,12 @@ public class IPersonServiceImpl implements IPersonService {
     for (Person person : persons) {
       if (person.getAddress().equals(address)) {
 
-        //To calculate age before setting it
-    AgeCalculator ageCalculator = new AgeCalculator();
-        
-        
+        // To calculate age before setting it
+        AgeCalculator ageCalculator = new AgeCalculator();
+
         PersonsByAddressInfosDTO personDTO = PersonsByAddressInfosDTO.builder()
-            .firstName(person.getFirstName()).lastName(person.getLastName()).phoneNumber(person.getPhone())
+            .firstName(person.getFirstName()).lastName(person.getLastName())
+            .phoneNumber(person.getPhone())
             .age(ageCalculator.CalculateAge(person.getMedicalRecord().getBirthdate()))
             .medications(person.getMedicalRecord().getMedications())
             .allergies(person.getMedicalRecord().getAllergies()).build();
@@ -167,7 +155,7 @@ public class IPersonServiceImpl implements IPersonService {
           if (fireStation.getAddress().equals(address)) {
 
             personsListByAddressWithStationDTO.setStationNumber(fireStation.getStationNumber());
-            
+
           }
         }
         personsByAddressInfos.add(personDTO);
@@ -178,10 +166,8 @@ public class IPersonServiceImpl implements IPersonService {
     }
 
     personsListByAddressWithStationDTO.setPersonsByAddressInfo(personsByAddressInfos);
-    
-    
+
     return personsListByAddressWithStationDTO;
-    
 
   }
 
@@ -207,25 +193,28 @@ public class IPersonServiceImpl implements IPersonService {
   }
 
   @Override
-  public PersonInfoDTO findAllPersonInfo(String firstName, String lastName) {
+  public List<PersonInfoDTO> findAllPersonInfo(String firstName, String lastName) {
     AgeCalculator ageCalculator = new AgeCalculator();
-    logger.debug("Starting finding informations of : {}",firstName, lastName);
-    logger.info("Searching informations for {}",firstName, lastName);
-    
-    Person personInfo = findByName(firstName, lastName);
-    
+    logger.debug("Starting finding informations of : {}", firstName, lastName);
+    logger.info("Searching informations for {}", firstName, lastName);
+
+    List<Person> personsSameName = findByName(firstName, lastName);
+    List<PersonInfoDTO> personsInfos = new ArrayList<>();
+
+    for (Person personInfo : personsSameName) {
       PersonInfoDTO personInfoDTO = PersonInfoDTO.builder().lastName(personInfo.getLastName())
           .firstName(personInfo.getFirstName()).address(personInfo.getAddress())
-          .age(ageCalculator.CalculateAge(personInfo.getMedicalRecord().getBirthdate())).email(personInfo.getEmail())
-          .medications(personInfo.getMedicalRecord().getMedications())
+          .age(ageCalculator.CalculateAge(personInfo.getMedicalRecord().getBirthdate()))
+          .email(personInfo.getEmail()).medications(personInfo.getMedicalRecord().getMedications())
           .allergies(personInfo.getMedicalRecord().getAllergies()).build();
+      personsInfos.add(personInfoDTO);
 
-
-    if (personInfo.equals(null)) {
+    }
+    if (personsInfos.equals(null)) {
       logger.error("No person informations");
       return null;
     }
-    return personInfoDTO;
+    return personsInfos;
   }
 
   @Override
@@ -233,7 +222,7 @@ public class IPersonServiceImpl implements IPersonService {
     logger.debug("Starting finding children at address : {}", address);
     List<ChildDTO> childrenList = new ArrayList<>();
     List<Person> persons = jSonDataBase.getPersons();
-    List<PhoneNumberDTO> personsAtSameHouse = new ArrayList<>();
+    List<PersonNameDTO> personsAtSameHouse = new ArrayList<>();
 
     logger.info("Searching children at address : {}", address);
     for (Person person : persons) {
@@ -242,15 +231,14 @@ public class IPersonServiceImpl implements IPersonService {
       if (person.getAddress().equals(address)) {
 
         // adding people to list of person in the house
-
-        personsAtSameHouse.add(PhoneNumberDTO.builder().firstName(person.getFirstName()).lastName(person.getLastName()).phoneNumber(person.getPhone()).build());
+        personsAtSameHouse.add(PersonNameDTO.builder().firstName(person.getFirstName())
+            .lastName(person.getLastName()).build());
 
         // checking if person is a child by calculating age
-
         AgeCalculator ageCalculator = new AgeCalculator();
-        
+
         int age = ageCalculator.CalculateAge(person.getMedicalRecord().getBirthdate());
-        
+
         // if child then create a DTo for child and add it to children list
         if (age <= 18) {
 
@@ -261,23 +249,25 @@ public class IPersonServiceImpl implements IPersonService {
         }
       }
     }
-      // setting list of person at same house for childDTO  and replace child to not repeat
-      for (ChildDTO child : childrenList) {
-     
+    // setting list of person at same house for childDTO and replace child to not repeat
+    for (ChildDTO child : childrenList) {
 
-     // Searching name of child to remove it to list member of the house
-        
-    Optional<PhoneNumberDTO> optionalPerson = personsAtSameHouse.stream()
-              .filter(p -> p.getFirstName().equals(child.getFirstName()) && p.getLastName().equals(child.getLastName())).findAny();
-      
-    PhoneNumberDTO childToReplace =  optionalPerson.get();
-     if (optionalPerson != null) {
-       
-       //Create new list of person at same house to set Child DTO without child concern
-       List<PhoneNumberDTO> personsAtSameHouseWithoutChildConcern = new ArrayList<>(personsAtSameHouse) ;
-       personsAtSameHouseWithoutChildConcern.remove(childToReplace);
-       child.setPersonsAtSameHouse(personsAtSameHouseWithoutChildConcern);
-     }
+      // Searching name of child to remove it to list member of the house
+
+      Optional<PersonNameDTO> optionalPerson = personsAtSameHouse.stream()
+          .filter(p -> p.getFirstName().equals(child.getFirstName())
+              && p.getLastName().equals(child.getLastName()))
+          .findAny();
+
+      PersonNameDTO childToReplace = optionalPerson.get();
+      if (optionalPerson != null) {
+
+        // Create new list of person at same house to set Child DTO without child concern
+        List<PersonNameDTO> personsAtSameHouseWithoutChildConcern = new ArrayList<>(
+            personsAtSameHouse);
+        personsAtSameHouseWithoutChildConcern.remove(childToReplace);
+        child.setPersonsAtSameHouse(personsAtSameHouseWithoutChildConcern);
+      }
     }
     if (childrenList.isEmpty()) {
       logger.info("No children found at address : {}", address);
