@@ -2,43 +2,92 @@ package com.safetynet.safetynetalerts.service;
 
 import java.util.List;
 
-import org.springframework.stereotype.Service;
-
 import com.safetynet.safetynetalerts.DTO.ChildDTO;
 import com.safetynet.safetynetalerts.DTO.EmailDTO;
 import com.safetynet.safetynetalerts.DTO.PersonInfoDTO;
-import com.safetynet.safetynetalerts.DTO.PersonsByAddressInfosDTO;
 import com.safetynet.safetynetalerts.DTO.PersonsListByAddressWithStationDTO;
 import com.safetynet.safetynetalerts.model.Person;
 
-@Service
+/**
+ * Interface for services operations concerning Person
+ *
+ * @author PUYJALON Pierre
+ * @since 11/03/2023
+ */
 public interface IPersonService {
 
-  /*Create a List of all persons*/
+  /**
+   * Get list of all persons from data
+   *
+   * @return List of Person
+   */
   public List<Person> findAll();
 
-  /*Add a person */
-  public Person addPerson (Person person);
+  /**
+   * Save in data a given Person
+   *
+   * @param person - Person
+   * @return Person
+   */
+  public Person addPerson(Person person);
 
-  /*Update a person by firstName and LastName */
-  public Person updatePerson (Person personUpdate);
+  /**
+   * Update specific person in data with a new person
+   *
+   * @param personUpdate - Person
+   * @return Person
+   */
+  public Person updatePerson(Person personUpdate);
 
-  /*Delete a person by firstName and LastName */
-  public Person deletePerson (String firstName, String lastName);
+  /**
+   * Delete Person from data by firstName and lastName
+   *
+   * @param firstName - String
+   * @param lastName - String
+   * @return Person
+   */
+  public List<Person> deletePerson(String firstName, String lastName);
 
-  /*Find a person by firstName and LastName*/
-  public Person findByName(String firstname, String lastName);
+  /**
+   * Find a Person from data by firstName and lastName
+   *
+   * @param firstName - String
+   * @param lastName - String
+   * @return List of Person
+   */
+  public List<Person> findByName(String firstname, String lastName);
 
-  /*(URL Fire) Create a List of DTO persons from an address with informations */
-  public PersonsListByAddressWithStationDTO findPersonsByAddressWithInfos (String address);
+  /**
+   * Get List of persons with informations and Firestation stationNumber, from an address
+   *
+   * @param address - String
+   * @return PersonsListByAddressWithStationDTO
+   */
+  public PersonsListByAddressWithStationDTO findPersonsByAddressWithInfos(String address);
 
-  /*(URL Email)Find email for all persons*/
+  /**
+   * Get List of emails for all persons by city
+   *
+   * @param city - String
+   * @return List of EmailDTO
+   */
   public List<EmailDTO> findAllEmailByCity(String city);
 
-  /* (URL N°6)Create a List of all informations for each person */
-  public PersonInfoDTO findAllPersonInfo (String firstName, String lastName);
+  /**
+   * Get all informations for a person(s) by name
+   *
+   * @param firstName - String
+   * @param lastName - String
+   * @return List of PersonInfoDTO
+   */
+  public List<PersonInfoDTO> findAllPersonInfo(String firstName, String lastName);
 
-  /*Create a List of children to an address */
-  public List<ChildDTO> findChildByAddress (String address);
+  /**
+   * Get all children at and address with informations
+   *
+   * @param address - String
+   * @return List of ChildDTO
+   */
+  public List<ChildDTO> findChildByAddress(String address);
 
 }

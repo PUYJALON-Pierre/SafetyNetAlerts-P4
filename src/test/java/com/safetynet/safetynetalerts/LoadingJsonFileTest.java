@@ -2,7 +2,6 @@ package com.safetynet.safetynetalerts;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -17,24 +16,24 @@ import com.safetynet.safetynetalerts.model.Person;
 @SpringBootTest
 public class LoadingJsonFileTest {
 
-  
+
   @Autowired
   JsonDataBase jsonDataBase;
-  
+
   @Test
   void LoadingJsonFile() {
 
     //Given
-    List<Person> persons = new ArrayList<>();
-    List<FireStation> fireStations = new ArrayList<>();
-    List<MedicalRecord> medicalRecords = new ArrayList<>();
+    List<Person> persons = null;
+    List<FireStation> fireStations = null;
+    List<MedicalRecord> medicalRecords = null;
 
     //When
     persons = jsonDataBase.getPersons();
     fireStations = jsonDataBase.getFirestations();
     medicalRecords = jsonDataBase.getMedicalRecords();
 
-    // Then
+    //Then
     assertNotNull(persons);
     assertNotNull(fireStations);
     assertNotNull(medicalRecords);

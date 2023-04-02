@@ -1,12 +1,10 @@
 package com.safetynet.safetynetalerts.service.impl;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,13 +14,18 @@ import org.springframework.stereotype.Service;
 import com.safetynet.safetynetalerts.DTO.PersonCoveredByStationNumberDTO;
 import com.safetynet.safetynetalerts.DTO.PersonsByAddressInfosDTO;
 import com.safetynet.safetynetalerts.DTO.PersonsByStationWithCountOfAdultAndChildDTO;
-import com.safetynet.safetynetalerts.DTO.PhoneNumberDTO;
 import com.safetynet.safetynetalerts.model.FireStation;
 import com.safetynet.safetynetalerts.model.JsonDataBase;
 import com.safetynet.safetynetalerts.model.Person;
 import com.safetynet.safetynetalerts.service.IFireStationService;
 import com.safetynet.safetynetalerts.util.AgeCalculator;
 
+/**
+ * Implementation of IFireSationService concerning FireStation operations
+ *
+ * @author PUYJALON Pierre
+ * @since 11/03/2023
+ */
 @Service
 public class IFireStationServiceImpl implements IFireStationService {
 
@@ -33,7 +36,14 @@ public class IFireStationServiceImpl implements IFireStationService {
 
   @Override
   public List<FireStation> findAll() {
-    return jSonDataBase.getFirestations();
+    logger.debug("Start finding all firestations");
+    logger.info("Getting all firestations ");
+
+    List<FireStation> fireStations = jSonDataBase.getFirestations();
+    if (fireStations.isEmpty()) {
+      logger.error("No firestations founded");
+    }
+    return fireStations;
   }
 
   @Override
@@ -64,7 +74,7 @@ public class IFireStationServiceImpl implements IFireStationService {
     // If match found, set new stationNumber to update
     if (optionalFireStation.isPresent()) {
       optionalFireStation.get().setStationNumber(fireStation.getStationNumber());
-      logger.info("Firestation found and updated");
+      logger.info("Firestation found and station number updated");
     } else {
       logger.error("Error finding firestation number to udpate, no match found");
     }
@@ -85,7 +95,8 @@ public class IFireStationServiceImpl implements IFireStationService {
       jSonDataBase.setFirestations(fireStations);
     } else {
       logger.error(
-          "Error finding firestation to delete, no match found by address and station number");
+          "Error finding firestation to delete, no match found by address {} and station number {}",
+          address, stationNumber);
 
     }
     return fireStationToDelete;
@@ -94,17 +105,18 @@ public class IFireStationServiceImpl implements IFireStationService {
   @Override
   public FireStation findStationByAddress(String address, String stationNumber) {
     logger.debug("Finding firestation by address : {} and number : {}", address, stationNumber);
-    // Finding fireStation to delete with a stream filter by address and stationNumber
+    // Finding fireStation with a stream filter by address and stationNumber
     Optional<FireStation> optionalFireStation = jSonDataBase.getFirestations().stream()
         .filter(p -> p.getAddress().equals(address) && p.getStationNumber().equals(stationNumber))
         .findAny();
 
-    // If match found, remove it and set to delete
+    // If match found, return it
     if (optionalFireStation.isPresent()) {
       logger.info("Found firestation with address {} and number {} ", address, stationNumber);
       return optionalFireStation.get();
     } else {
-      logger.error("No more finding firestations by address and station number, no match");
+      logger.error("No more finding firestations by address : {} and station number : {}, no match",
+          address, stationNumber);
     }
     return null;
   }
@@ -113,39 +125,37 @@ public class IFireStationServiceImpl implements IFireStationService {
 
   @Override
   public List<PersonsByAddressInfosDTO> findAllPersonsSortedByAddressAndStation(
-      List <String> stationNumberList) {
-    logger.debug("Start finding persons for stations {} sorted by address", stationNumberList);
+      List<String> stationNumberList) {
+    logger.debug("Start finding persons for stations : {}, sorted by address", stationNumberList);
     List<PersonsByAddressInfosDTO> personsByStationSortByAddress = new ArrayList<>();
-    
-    for(String stationNumber : stationNumberList){
-    
 
-    List<Person> personsByStation = findPersonsByStation(stationNumber);
+    for (String stationNumber : stationNumberList) {
 
-    //in order to sort by address (useless??)
-    personsByStation.sort((t1, t2) -> {
-      return t1.getAddress().compareTo(t2.getAddress());
-    });
-    logger.info("Creating information of person from station number {} ",  stationNumber);
-    for (Person person : personsByStation) {
-   
-      //To calculate age before setting it
-      
-      AgeCalculator ageCalculator = new AgeCalculator();
+      List<Person> personsByStation = findPersonsByStation(stationNumber);
 
-      PersonsByAddressInfosDTO personSortByAddressDTO = PersonsByAddressInfosDTO.builder()
-          .address(person.getAddress()).lastName(person.getLastName())
-          .firstName(person.getFirstName()).phoneNumber(person.getPhone())
-          .age(ageCalculator.CalculateAge(person.getMedicalRecord().getBirthdate()))
-          .medications(person.getMedicalRecord().getMedications())
-          .allergies(person.getMedicalRecord().getAllergies()).build();
+      // in order to sort by address
+      personsByStation.sort((t1, t2) -> {
+        return t1.getAddress().compareTo(t2.getAddress());
+      });
+      logger.info("Creating informations of persons from station number {} ", stationNumber);
+      for (Person person : personsByStation) {
 
-      personsByStationSortByAddress.add(personSortByAddressDTO);
-    }
-   
-    if (personsByStationSortByAddress.isEmpty()) {
-      logger.error("Error, no persons found for station number : {}", stationNumber);
-    }
+        // To calculate age before setting it
+        AgeCalculator ageCalculator = new AgeCalculator();
+
+        PersonsByAddressInfosDTO personSortByAddressDTO = PersonsByAddressInfosDTO.builder()
+            .address(person.getAddress()).lastName(person.getLastName())
+            .firstName(person.getFirstName()).phoneNumber(person.getPhone())
+            .age(ageCalculator.CalculateAge(person.getMedicalRecord().getBirthdate()))
+            .medications(person.getMedicalRecord().getMedications())
+            .allergies(person.getMedicalRecord().getAllergies()).build();
+
+        personsByStationSortByAddress.add(personSortByAddressDTO);
+      }
+
+      if (personsByStationSortByAddress.isEmpty()) {
+        logger.error("Error, no persons found for station(s) number : {}", stationNumberList);
+      }
     }
     return personsByStationSortByAddress;
   }
@@ -153,45 +163,32 @@ public class IFireStationServiceImpl implements IFireStationService {
   @Override
   public PersonsByStationWithCountOfAdultAndChildDTO findPersonsByStationWithAdultAndChildCount(
       String stationNumber) {
-    logger.debug("Start finding persons from station {} with adult and children count", stationNumber);
-    
+    logger.debug("Start finding persons from station {} with adult and children count",
+        stationNumber);
+
     List<Person> personsByStation = findPersonsByStation(stationNumber);
     List<PersonCoveredByStationNumberDTO> personsByStationWithInfos = new ArrayList<>();
     PersonsByStationWithCountOfAdultAndChildDTO personsByStationWithInfosAndCount = null;
 
-    // variables in order to count adult and children
+    // int variables in order to count adult and children
     int numberChildren = 0;
     int numberAdult = 0;
-    
-    logger.info("Searching adults and children from station number {} ",  stationNumber);
+
+    logger.info("Searching adults and children from station number {} ", stationNumber);
     for (Person person : personsByStation) {
 
-      PersonCoveredByStationNumberDTO personCoveredByStationNumberDTO = PersonCoveredByStationNumberDTO.builder()
-          .lastName(person.getLastName()).firstName(person.getFirstName())
+      PersonCoveredByStationNumberDTO personCoveredByStationNumberDTO = PersonCoveredByStationNumberDTO
+          .builder().lastName(person.getLastName()).firstName(person.getFirstName())
           .address(person.getAddress()).phoneNumber(person.getPhone()).build();
 
       personsByStationWithInfos.add(personCoveredByStationNumberDTO);
 
       // checking if person is a child by calculating age
-      Date birthdate = null;
-      try {
-        birthdate = (new SimpleDateFormat("MM/dd/yyyy"))
-            .parse(person.getMedicalRecord().getBirthdate());
-      } catch (ParseException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
+      AgeCalculator ageCalculator = new AgeCalculator();
 
-      Date actualDate = new Date();
-      // Calculating age
-      Long ageMillisecond = (actualDate.getTime() - birthdate.getTime());
+      int age = ageCalculator.CalculateAge(person.getMedicalRecord().getBirthdate());
 
-      // converting age into years
-      Calendar c = Calendar.getInstance();
-      c.setTimeInMillis(ageMillisecond);
-      int age = c.get(Calendar.YEAR) - 1970;
-
-      // if child then add increment count
+      // increment count
       if (age <= 18) {
 
         numberChildren++;
@@ -200,7 +197,7 @@ public class IFireStationServiceImpl implements IFireStationService {
       }
     }
 
-    // add count of adult and children to list
+    // Set count of adults and children with list by creating DTO
     personsByStationWithInfosAndCount = PersonsByStationWithCountOfAdultAndChildDTO.builder()
         .personListByStationNumber(personsByStationWithInfos).numberChildren(numberChildren)
         .numberAdult(numberAdult).build();
@@ -208,20 +205,19 @@ public class IFireStationServiceImpl implements IFireStationService {
     if (personsByStationWithInfosAndCount == null) {
       logger.error("Error, no persons found for station number : {}", stationNumber);
     }
-    
-    
+
     return personsByStationWithInfosAndCount;
   }
 
   @Override
   public List<Person> findPersonsByStation(String stationNumber) {
     logger.debug("Start finding persons from station {} ", stationNumber);
-    
+
     List<Person> persons = jSonDataBase.getPersons();
     List<FireStation> fireStations = jSonDataBase.getFirestations();
     List<Person> personsByStation = new ArrayList<>();
-    
-    logger.info("Searching persons from station number {} ",  stationNumber);
+
+    logger.info("Searching persons from station number {} ", stationNumber);
     for (FireStation fireStation : fireStations) {
       /*
        * if stationNumber is equal to fireStationNumber, return a list of persons covered by this
@@ -240,36 +236,32 @@ public class IFireStationServiceImpl implements IFireStationService {
         personsByStation = fireStation.getPersonsByStation();
       }
     }
-    
+
     if (personsByStation.isEmpty()) {
       logger.error("Error, no persons found for station number : {}", stationNumber);
     }
     return personsByStation;
   }
 
-  
   @Override
-  public List<PhoneNumberDTO> findPhoneNumbersByStation(String stationNumber) {
-   
+  public Set <String> findPhoneNumbersByStation(String stationNumber) {
+
     logger.debug("Start finding person's phone number from station {} ", stationNumber);
     // Creation of a list to return with phoneNumbers
-    List<PhoneNumberDTO> phoneNumberListByStation = new ArrayList<>();
+    Set<String> phoneNumberSetByStation = new HashSet<>();
 
     List<Person> personsByStation = findPersonsByStation(stationNumber);
-    logger.info("Searching phone numbers from station number {} ",  stationNumber);
+    logger.info("Searching phone numbers from station number {} ", stationNumber);
     for (Person person : personsByStation) {
 
-      PhoneNumberDTO phoneNumberByStation = PhoneNumberDTO.builder().lastName(person.getLastName())
-          .firstName(person.getFirstName()).phoneNumber(person.getPhone()).build();
-
-      phoneNumberListByStation.add(phoneNumberByStation);
+      phoneNumberSetByStation.add(person.getPhone());
 
     }
-   
-    if (phoneNumberListByStation.isEmpty()) {
+
+    if (phoneNumberSetByStation.isEmpty()) {
       logger.error("Error, no phone number found for station number : {}", stationNumber);
     }
-    return phoneNumberListByStation;
+    return phoneNumberSetByStation;
   }
 
 }

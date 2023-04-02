@@ -15,12 +15,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.safetynet.safetynetalerts.DTO.PersonsByAddressInfosDTO;
-import com.safetynet.safetynetalerts.DTO.PersonsByStationWithCountOfAdultAndChildDTO;
-import com.safetynet.safetynetalerts.DTO.PhoneNumberDTO;
 import com.safetynet.safetynetalerts.model.FireStation;
 import com.safetynet.safetynetalerts.service.IFireStationService;
 
+/**
+ * Controller class for fireStations CRUD Endpoints
+ *
+ * @author PUYJALON Pierre
+ * @since 11/03/2023
+ */
 @RestController
 public class FireStationController {
 
@@ -29,9 +32,12 @@ public class FireStationController {
   @Autowired
   private IFireStationService iFireStationService;
 
-  /************** ENDPOINT FOR UPDATING DATA ***************/
-
-  // Add new fireStation
+  /**
+   * Creating new fireStation
+   *
+   * @param fireStation - FireStation object to add
+   * @return ResponseEntity FireStation
+   */
   @PostMapping(value = "/firestation")
   public ResponseEntity<FireStation> addFireStation(@RequestBody FireStation fireStation) {
     logger.debug("PostMapping firestation {} ", fireStation);
@@ -39,14 +45,19 @@ public class FireStationController {
 
     if (fireStationToAdd == null) {
       logger.error("Error during adding firestation");
-      return new ResponseEntity<FireStation>(fireStationToAdd, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(fireStationToAdd, HttpStatus.BAD_REQUEST);
     } else {
       logger.info("Creation of firestation completed or already existing");
-      return new ResponseEntity<FireStation>(fireStationToAdd, HttpStatus.CREATED);
+      return new ResponseEntity<>(fireStationToAdd, HttpStatus.CREATED);
     }
   }
 
-  // UpdatePerson fireStation
+  /**
+   * Updating existing fireStation
+   *
+   * @param firestationUpdate - FireStation object to update
+   * @return ResponseEntity FireStation
+   */
   @PutMapping(value = "/firestation")
   public ResponseEntity<FireStation> updateFireStation(@RequestBody FireStation firestationUpdate) {
     logger.debug("PutMapping firestation {} ", firestationUpdate);
@@ -55,14 +66,20 @@ public class FireStationController {
 
     if (fireStationToUpdate == null) {
       logger.error("Error during updating firestation");
-      return new ResponseEntity<FireStation>(fireStationToUpdate, HttpStatus.NOT_FOUND);
+      return new ResponseEntity<>(fireStationToUpdate, HttpStatus.NOT_FOUND);
     } else {
       logger.info("Firestation station number updated successfully");
-      return new ResponseEntity<FireStation>(fireStationToUpdate, HttpStatus.OK);
+      return new ResponseEntity<>(fireStationToUpdate, HttpStatus.OK);
     }
   }
 
-  // Delete new person by firstName and lastName
+  /**
+   * Delete fireStation by address and station number
+   *
+   * @param address - FireStationToDelete address
+   * @param stationNumber - FireStationToDelete stationNumber
+   * @return ResponseEntity FireStation
+   */
   @DeleteMapping(value = "/firestation")
   public ResponseEntity<FireStation> deleteFireStation(
       @RequestParam(value = "address") String address,
@@ -72,18 +89,20 @@ public class FireStationController {
 
     if (fireStationToDelete == null) {
       logger.error("Error during deleting firestation");
-      return new ResponseEntity<FireStation>(fireStationToDelete, HttpStatus.NOT_FOUND);
+      return new ResponseEntity<>(fireStationToDelete, HttpStatus.NOT_FOUND);
     }
 
     else {
       logger.info("Firestation deleting successfully");
-      return new ResponseEntity<FireStation>(fireStationToDelete, HttpStatus.OK);
+      return new ResponseEntity<>(fireStationToDelete, HttpStatus.OK);
     }
   }
 
-  /************** SPECIFIED ENDPOINTS **************/
-
-  // Retrieve all fireStations
+  /**
+   * Retrieve all fireStations
+   *
+   * @return ResponseEntity (List of FireStation)
+   */
   @GetMapping("/firestations")
   public ResponseEntity<List<FireStation>> retrieveAllFireStations() {
     logger.debug("GetMapping of all firestations");
@@ -92,13 +111,11 @@ public class FireStationController {
 
     if (fireStations.isEmpty()) {
       logger.error("Error during recuperation of firestations");
-      return new ResponseEntity<List<FireStation>>(fireStations, HttpStatus.NOT_FOUND);
+      return new ResponseEntity<>(fireStations, HttpStatus.NOT_FOUND);
     } else {
-    logger.info("Firestation list found");
-    return new ResponseEntity<List<FireStation>>(fireStations, HttpStatus.FOUND);}
+      logger.info("Firestation list found");
+      return new ResponseEntity<>(fireStations, HttpStatus.FOUND);
+    }
   }
-
-
-
 
 }

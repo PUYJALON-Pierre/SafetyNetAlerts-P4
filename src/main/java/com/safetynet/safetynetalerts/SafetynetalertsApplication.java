@@ -20,19 +20,28 @@ import com.safetynet.safetynetalerts.model.JsonDataBase;
 import com.safetynet.safetynetalerts.model.MedicalRecord;
 import com.safetynet.safetynetalerts.model.Person;
 
+/**
+ * Main class of SafetynetalertsApplication, which is a Rest API that can manage informations about
+ * inhabitants from a JsonFile and send them to emergency services when needed, in order to prevent
+ * emergencies situations.
+ *
+ * @author PUYJALON Pierre
+ * @since 11/03/2023
+ * @version 1.0.0
+ */
 @SpringBootApplication
 public class SafetynetalertsApplication {
 
   @Autowired
   JsonDataBase jsonDataBase;
-  
+
   final static Logger logger = LogManager.getLogger(SafetynetalertsApplication.class);
 
   public static void main(String[] args) {
 
     logger.debug("Starting SafetynetalertsApplication");
     SpringApplication.run(SafetynetalertsApplication.class, args);
-    
+
   }
 
   @Bean
@@ -43,6 +52,8 @@ public class SafetynetalertsApplication {
 
       String filePath = "src/main/resources/data.json";
       byte[] bytesFile = Files.readAllBytes(new File(filePath).toPath());
+
+      // Iterating
 
       JsonIterator iterator = JsonIterator.parse(bytesFile);
       Any any = iterator.readAny();
@@ -86,7 +97,13 @@ public class SafetynetalertsApplication {
     };
   }
 
-
+  /**
+   * This method initialize persons by building person objects and returning a list of person, from
+   * elements iterated in a JsonFile
+   *
+   * @param personToRead - Any elements filtered by JsonIterator that concern person
+   * @return List of Person
+   */
   private List<Person> initializePersons(Any personToRead) {
 
     // Iterating and building for Persons
@@ -111,7 +128,13 @@ public class SafetynetalertsApplication {
 
   }
 
-
+  /**
+   * This method initialize medicalRecords by building medicalRecord objects and returning a list of
+   * medicalRecords, from elements iterated in a JsonFile
+   *
+   * @param medicalToRead - Any elements filtered by JsonIterator that concern medicalRecords
+   * @return List of MedicalRecord
+   */
   private List<MedicalRecord> initializeMedicalRecords(Any medicalToRead) {
 
     // Iterating and building for Medical Records
@@ -132,7 +155,13 @@ public class SafetynetalertsApplication {
     return medicalRecords;
   }
 
-
+  /**
+   * This method initialize fireStations by building fireStation objects and returning a list of
+   * fireStations, from elements iterated in a JsonFile
+   *
+   * @param firestationToRead - Any elements filetered by JsonIterator that concern fireStations
+   * @return List of FireStation
+   */
   private List<FireStation> initializeFireStations(Any firestationToRead) {
 
     // Iterating and building for FireStations
@@ -148,10 +177,15 @@ public class SafetynetalertsApplication {
 
   }
 
-
+  /**
+   * Linking between persons and medicalRecords, by setting a medical record to a person with
+   * firstName and lastName
+   *
+   * @param persons - List of Person
+   * @param medicalRecords - List of MedicalRecord
+   */
   private void addMedicalRecordToPerson(List<Person> persons, List<MedicalRecord> medicalRecords) {
-   
-    // Linking between persons and medicalRecords
+
     for (Person person : persons) {
 
       for (MedicalRecord medicalRecord : medicalRecords) {
@@ -166,9 +200,15 @@ public class SafetynetalertsApplication {
 
   }
 
-
+  /**
+   * Linking between persons and fireStations, by adding persons to fireStations with address in
+   * personsByStation List
+   *
+   * @param persons - List of Person
+   * @param fireStations - List of FireStation
+   */
   private void addPersonToFireStation(List<Person> persons, List<FireStation> fireStations) {
-    
+
     // Linking between persons and fireStations
     for (FireStation firestation : fireStations) {
 
@@ -184,5 +224,6 @@ public class SafetynetalertsApplication {
     }
 
   }
+
 
 }

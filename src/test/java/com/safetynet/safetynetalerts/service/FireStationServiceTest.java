@@ -5,11 +5,11 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,13 +17,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import com.safetynet.safetynetalerts.DTO.PersonsByAddressInfosDTO;
 import com.safetynet.safetynetalerts.DTO.PersonsByStationWithCountOfAdultAndChildDTO;
-import com.safetynet.safetynetalerts.DTO.PhoneNumberDTO;
 import com.safetynet.safetynetalerts.model.FireStation;
 import com.safetynet.safetynetalerts.model.JsonDataBase;
 import com.safetynet.safetynetalerts.model.MedicalRecord;
 import com.safetynet.safetynetalerts.model.Person;
-import com.safetynet.safetynetalerts.service.impl.IFireStationServiceImpl;
-import com.safetynet.safetynetalerts.util.AgeCalculator;
 
 @SpringBootTest
 public class FireStationServiceTest {
@@ -47,8 +44,6 @@ public class FireStationServiceTest {
   @BeforeEach
   void setUpPerTest() throws Exception {
 
-
-    
     medications.add("aznol:350mg" + "hydrapermazol:100mg");
     allergies.add("nillacilan");
 
@@ -96,6 +91,7 @@ public class FireStationServiceTest {
 
   @AfterEach
   void cleanUpPerTest() throws Exception {
+
     firestations.clear();
     persons.clear();
     medicalRecords.clear();
@@ -103,7 +99,7 @@ public class FireStationServiceTest {
   }
 
   @Test
-  void FindAllFireStationsTest() {
+  void findAllFireStationsTest() {
 
     List<FireStation> findAllStations = iFireStationService.findAll();
     assertEquals(findAllStations, jsonDataBase.getFirestations());
@@ -129,6 +125,7 @@ public class FireStationServiceTest {
 
   @Test
   void updateFireStationTest() {
+
     // given
     firestations.clear();
 
@@ -155,6 +152,7 @@ public class FireStationServiceTest {
 
   @Test
   void deleteFireStationTest() {
+
     firestations.clear();
 
     // given
@@ -171,24 +169,23 @@ public class FireStationServiceTest {
     assertEquals(emptyList, firestations);
   }
 
-  
-
   @Test
-  void  findStationByAddressTest () {
+  void findStationByAddressTest() {
+
     // firstName and lastName parameters
     String address = "1509 Culver St";
     String stationNumber = "3";
 
     // When findByname
-    FireStation fireStationToFind = iFireStationService.findStationByAddress(address, stationNumber);
+    FireStation fireStationToFind = iFireStationService.findStationByAddress(address,
+        stationNumber);
 
     // retrieve person attributes
     assertEquals(fireStationToFind.getAddress(), "1509 Culver St");
     assertEquals(fireStationToFind.getStationNumber(), "3");
 
   }
-  
- 
+
   @Test
   void findPersonByStationTest() {
     // Given stationNumber searching
@@ -212,7 +209,7 @@ public class FireStationServiceTest {
 
     // When
     personsByStation = iFireStationService.findPersonsByStation(stationNumber);
-    
+
     // Then
     assertEquals(personsByStation.size(), 1);
     assertEquals(personsByStation.get(0).getFirstName(), "Lily");
@@ -229,10 +226,9 @@ public class FireStationServiceTest {
   void findAllPersonsSortedByAddressAndStationTest() {
 
     // stationlist to search
-    List <String> stationNumberList = new ArrayList<>();
+    List<String> stationNumberList = new ArrayList<>();
     stationNumberList.add("1");
     stationNumberList.add("78");
-
 
     // adding person in disorder to this station
     medications.clear();
@@ -294,47 +290,49 @@ public class FireStationServiceTest {
         .findAllPersonsSortedByAddressAndStation(stationNumberList);
 
     // Then
-    
+
     assertEquals(personsByStationSortByAddress.size(), 4);
-    
-    //first person
+
+    // first person
 
     assertEquals(personsByStationSortByAddress.get(0).getAddress(), "644 Gershwin Cir");
     assertEquals(personsByStationSortByAddress.get(0).getLastName(), "Boyd");
     assertEquals(personsByStationSortByAddress.get(0).getFirstName(), "Duncan");
-    //assertEquals(personsByStationSortByAddress.get(0).getAge(), 20);
+    // assertEquals(personsByStationSortByAddress.get(0).getAge(), 20);
     assertEquals(personsByStationSortByAddress.get(0).getPhoneNumber(), "841-874-6512");
-    assertEquals(personsByStationSortByAddress.get(0).getMedications().toString(), "[aznol:350mghydrapermazol:100mg]");
+    assertEquals(personsByStationSortByAddress.get(0).getMedications().toString(),
+        "[aznol:350mghydrapermazol:100mg]");
     assertEquals(personsByStationSortByAddress.get(0).getAllergies().toString(), "[nillacilan]");
-  
-    //second person
+
+    // second person
 
     assertEquals(personsByStationSortByAddress.get(1).getAddress(), "908 73rd St");
     assertEquals(personsByStationSortByAddress.get(1).getLastName(), "Walker");
     assertEquals(personsByStationSortByAddress.get(1).getFirstName(), "Reginold");
     assertEquals(personsByStationSortByAddress.get(1).getPhoneNumber(), "841-874-8547");
-    assertEquals(personsByStationSortByAddress.get(1).getMedications().toString(), "[aznol:350mghydrapermazol:100mg]");
+    assertEquals(personsByStationSortByAddress.get(1).getMedications().toString(),
+        "[aznol:350mghydrapermazol:100mg]");
     assertEquals(personsByStationSortByAddress.get(1).getAllergies().toString(), "[nillacilan]");
-    
-    
-    //third person
+
+    // third person
 
     assertEquals(personsByStationSortByAddress.get(2).getAddress(), "908 73rd St");
     assertEquals(personsByStationSortByAddress.get(2).getLastName(), "Peters");
     assertEquals(personsByStationSortByAddress.get(2).getFirstName(), "Jamie");
     assertEquals(personsByStationSortByAddress.get(2).getPhoneNumber(), "841-874-7462");
-    assertEquals(personsByStationSortByAddress.get(2).getMedications().toString(), "[aznol:350mghydrapermazol:100mg]");
+    assertEquals(personsByStationSortByAddress.get(2).getMedications().toString(),
+        "[aznol:350mghydrapermazol:100mg]");
     assertEquals(personsByStationSortByAddress.get(2).getAllergies().toString(), "[nillacilan]");
-    
-    //fourth person
+
+    // fourth person
 
     assertEquals(personsByStationSortByAddress.get(3).getAddress(), "947 E. Rose Dr");
     assertEquals(personsByStationSortByAddress.get(3).getLastName(), "Stelzer");
     assertEquals(personsByStationSortByAddress.get(3).getFirstName(), "Brian");
     assertEquals(personsByStationSortByAddress.get(3).getPhoneNumber(), "841-874-7784");
-    assertEquals(personsByStationSortByAddress.get(3).getMedications().toString(), "[aznol:350mghydrapermazol:100mg]");
+    assertEquals(personsByStationSortByAddress.get(3).getMedications().toString(),
+        "[aznol:350mghydrapermazol:100mg]");
     assertEquals(personsByStationSortByAddress.get(3).getAllergies().toString(), "[nillacilan]");
-   
 
   }
 
@@ -380,17 +378,23 @@ public class FireStationServiceTest {
 
     // Then
     assertEquals(personsByStationWithAdultAndChildCount.getPersonListByStationNumber().size(), 1);
-    assertEquals(personsByStationWithAdultAndChildCount.getPersonListByStationNumber().get(0).getFirstName(), "Lily");
-    assertEquals(personsByStationWithAdultAndChildCount.getPersonListByStationNumber().get(0).getLastName(), "Cooper");
-    assertEquals(personsByStationWithAdultAndChildCount.getPersonListByStationNumber().get(0).getPhoneNumber(), "841-874-9845");
-    assertEquals(personsByStationWithAdultAndChildCount.getPersonListByStationNumber().get(0).getAddress(), "489 Manchester St");
-    
+    assertEquals(
+        personsByStationWithAdultAndChildCount.getPersonListByStationNumber().get(0).getFirstName(),
+        "Lily");
+    assertEquals(
+        personsByStationWithAdultAndChildCount.getPersonListByStationNumber().get(0).getLastName(),
+        "Cooper");
+    assertEquals(personsByStationWithAdultAndChildCount.getPersonListByStationNumber().get(0)
+        .getPhoneNumber(), "841-874-9845");
+    assertEquals(
+        personsByStationWithAdultAndChildCount.getPersonListByStationNumber().get(0).getAddress(),
+        "489 Manchester St");
+
     assertEquals(personsByStationWithAdultAndChildCount.getNumberChildren(), 1);
     assertEquals(personsByStationWithAdultAndChildCount.getNumberAdult(), 0);
-    
+
   }
 
-  
   @Test
   void findPhoneNumbersByStationTest() {
 
@@ -415,14 +419,12 @@ public class FireStationServiceTest {
 
     // When
     personsByStation = iFireStationService.findPersonsByStation(stationNumber);
-    List<PhoneNumberDTO> phoneNumberByStation = iFireStationService
+    Set<String> phoneNumberByStation = iFireStationService
         .findPhoneNumbersByStation(stationNumber);
     // Then
     assertEquals(phoneNumberByStation.size(), 1);
-    assertEquals(phoneNumberByStation.get(0).getFirstName(), "Lily");
-    assertEquals(phoneNumberByStation.get(0).getLastName(), "Cooper");
-    assertEquals(phoneNumberByStation.get(0).getPhoneNumber(), "841-874-9845");
-   
+    assertEquals(phoneNumberByStation.iterator().next(), "841-874-9845");
+
   }
 
 }

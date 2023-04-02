@@ -9,15 +9,13 @@ import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import com.safetynet.safetynetalerts.model.JsonDataBase;
 import com.safetynet.safetynetalerts.model.MedicalRecord;
-import com.safetynet.safetynetalerts.service.impl.IMedicalRecordServiceImpl;
+import com.safetynet.safetynetalerts.model.Person;
 
 @SpringBootTest
 public class MedicalRecordServiceTest {
@@ -60,11 +58,27 @@ public class MedicalRecordServiceTest {
   }
 
   @Test
-  void FindAllMedicalRecordsTest() {
+  void findAllMedicalRecordsTest() {
 
     List<MedicalRecord> findAllMedicalRecords = iMedicalRecordService.findAll();
 
     assertEquals(findAllMedicalRecords, jsonDataBase.getMedicalRecords());
+
+  }
+
+  @Test
+  void addMedicalRecordTest() {
+
+    // Given
+    MedicalRecord medicalRecord1 = MedicalRecord.builder().firstName("Benoit").lastName("Dupont")
+        .birthdate("03/06/1994").medications(medications).allergies(allergies).build();
+
+    // when add person
+    iMedicalRecordService.addMedicalRecord(medicalRecord1);
+
+    // retrieve number of medicalRecords expected with size list
+    int numberOfPersonExpected = 5;
+    assertEquals(medicalRecords.size(), numberOfPersonExpected);
 
   }
 
@@ -98,7 +112,7 @@ public class MedicalRecordServiceTest {
     assertEquals(medicalRecords.get(0).getFirstName(), "John");
     assertEquals(medicalRecords.get(0).getBirthdate(), "03/06/1993");
     assertEquals(medicalRecords.get(0).getMedications(), medications2);
-    assertEquals(medicalRecords.get(0).getAllergies(),allergies2);
+    assertEquals(medicalRecords.get(0).getAllergies(), allergies2);
 
   }
 

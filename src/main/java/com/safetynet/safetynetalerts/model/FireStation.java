@@ -7,6 +7,13 @@ import lombok.Builder;
 import lombok.Data;
 
 
+
+/**
+ * Model class for fireStation
+ *
+ * @author PUYJALON Pierre
+ * @since 11/03/2023
+ */
  @Data
  @Builder
   public class FireStation {

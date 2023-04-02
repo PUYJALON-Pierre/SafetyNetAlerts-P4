@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import com.safetynet.safetynetalerts.model.JsonDataBase;
 import com.safetynet.safetynetalerts.model.MedicalRecord;
-import com.safetynet.safetynetalerts.model.Person;
 import com.safetynet.safetynetalerts.service.IMedicalRecordService;
 
 @Service
@@ -28,28 +27,23 @@ public class IMedicalRecordServiceImpl implements IMedicalRecordService {
     logger.info(" Getting all medical records ");
     List<MedicalRecord> medicalRecords = jSonDataBase.getMedicalRecords();
     if (medicalRecords.isEmpty()) {
-      logger.error("No medical record found");
+      logger.error("No medical record founded");
     }
     return medicalRecords;
   }
 
   @Override
   public MedicalRecord addMedicalRecord(MedicalRecord medicalRecord) {
-    logger.debug("Starting adding person");
+    logger.debug("Starting adding medicalRecord");
     List<MedicalRecord> medicalRecords = jSonDataBase.getMedicalRecords();
 
-    // checking if medicalRecord already exist
-    boolean anyMatch = medicalRecords.stream()
-        .anyMatch(p -> p.getFirstName().equals(medicalRecord.getFirstName())
-            && p.getLastName().equals(medicalRecord.getLastName()));
-    if (!anyMatch) {
-      logger.info("Medical record add because not already existing");
-      medicalRecords.add(medicalRecord);
-      jSonDataBase.setMedicalRecords(medicalRecords);
-    } else {
-      logger.info("Medical record not add because already existing");
-    }
+    logger.info("Medical record add");
+    medicalRecords.add(medicalRecord);
+    jSonDataBase.setMedicalRecords(medicalRecords);
 
+    if (medicalRecord.equals(null)) {
+      logger.error("MedicalRecord to add is null");
+    }
     return medicalRecord;
   }
 
@@ -67,7 +61,7 @@ public class IMedicalRecordServiceImpl implements IMedicalRecordService {
 
       medicalRecordToUpdate = optionalMedicalRecord.get();
 
-      // updating personToUpdate by personUpdate (expect firstName an d lastName)
+      // updating personToUpdate by personUpdate (expect firstName and lastName)
       medicalRecordToUpdate.setBirthdate(medicalRecordUpdate.getBirthdate());
       medicalRecordToUpdate.setMedications(medicalRecordUpdate.getMedications());
       medicalRecordToUpdate.setAllergies(medicalRecordUpdate.getAllergies());
@@ -107,8 +101,7 @@ public class IMedicalRecordServiceImpl implements IMedicalRecordService {
     if (optionalMedicalRecord.isPresent()) {
       logger.info("Found medical record for : {}, {} ", firstName, lastName);
       return optionalMedicalRecord.get();
-    }
-    else {
+    } else {
       logger.info("Error finding medical record for {}, {}", firstName, lastName);
     }
     return null;
