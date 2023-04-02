@@ -11,7 +11,7 @@ The aim is to manage informations about inhabitants and send them to emergency s
 - Java 17 
 - Maven 3.8.7 
 - Spring Boot 3.0.2
-- Maven dependencies : Jsoniter (0.9.19) / Lombok (1.18.20) / Surefire() / Jacoco(0.8.8) / log4j(1.2.17) /
+- Maven dependencies : Jsoniter (0.9.19) / Lombok (1.18.20) / Surefire(3.0.0) / Jacoco(0.8.8) / log4j(1.2.17) /
 
 - Properties in : src/main/resources/application.properties
 - Server port 8080 (http://localhost:8080)
@@ -70,29 +70,29 @@ The aim is to manage informations about inhabitants and send them to emergency s
 
 ## Specifics Endpoints :
 
-- __GET__ http://localhost:8080/firestation?stationNumber=<station_number> (return list of person covered by a fireStation with count of adult and children)
+- __GET__ http://localhost:8080/firestation?stationNumber={station_number} (return list of person covered by a fireStation with count of adult and children)
 
-- __GET__ http://localhost:8080/childAlert?address=<address> (return list of children living at an address with persons living at same address)
+- __GET__ http://localhost:8080/childAlert?address={address} (return list of children living at an address with persons living at same address)
 
-- __GET__ http://localhost:8080/phoneAlert?firestation=<firestation_number> (return list of person's phonenumbers covered by a firestation)
+- __GET__ http://localhost:8080/phoneAlert?firestation={firestation_number} (return list of person's phonenumbers covered by a firestation)
 
-- __GET__ http://localhost:8080/fire?address=<address> (return list of persons living at an address with station number desserving this address)
+- __GET__ http://localhost:8080/fire?address={address} (return list of persons living at an address with station number desserving this address)
 
-- __GET__ http://localhost:8080/flood/stations?stations=<list_of_station_numbers> (return list of addresses deserved by a firestation)
+- __GET__ http://localhost:8080/flood/stations?stations={list_of_station_numbers} (return list of addresses deserved by a list of firestation)
 
-- __GET__ http://localhost:8080/personInfo?firstName=<firstName>&lastName=<lastName> (return specifics informations of all inhabitants)
+- __GET__ http://localhost:8080/personInfo?firstName={firstName}&lastName={lastName} (return specifics informations of all inhabitants)
 
-- __GET__ http://localhost:8080/communityEmail?city=<city> (return list of emails of all the habitants by city)
+- __GET__ http://localhost:8080/communityEmail?city={city} (return list of emails of all the habitants by city)
 
 -------------------------------------------------------------------------------------------------------------------------------------
 
-## ACTUATOR (GET) :
+## Actuator (GET) :
 
 __-INFO__ : http://localhost:8080/actuator/info
 
 __-HEALTH__ : http://localhost:8080/actuator/health
 
-__-TRACE__ : http://localhost:8080/actuator/httptrace
+__-TRACE__ : http://localhost:8080/actuator/httpexchanges
 
 __-METRICS__ : http://localhost:8080/actuator/metrics
 
